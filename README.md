@@ -24,15 +24,10 @@ Follow these steps to get the project up and running locally:
    git clone https://github.com/your-username/task_manager.git
    cd task_manager
 
-2. **Create a Virtual Environment**
-    Windows:
-    i. "python -m venv venv"
-    ii. "venv\Scripts\activate"
-
-3. **Install Dependencies**
+2. **Install Dependencies**
     i. "pip install -r requirements.txt"
 
-4. **Run Flask App**
+3. **Run Flask App**
     i. "python app.py"
     ii. Access App by clicking on this link: "http://127.0.0.1:5000"
 
