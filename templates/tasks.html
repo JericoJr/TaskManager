@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Tasks{% endblock %}
+
+{% block content %}
+  <h1 class="title-page">Tasks</h1>
+
+  <div class="task-features">
+    <button href="#" type="button" class="add-button" onclick="openPopup('add-task')">Add +</button>
+    <button type="button" class="filter-sort-button" onclick="openPopup('filter-sort-task')">Filter</button>
+    <h4>Tasks Count: {{ count }} </h2>
+  </div>
+  <!--Flash Messages for Login Note: different types like 'success' and 'error'-->
+  {% with messages = get_flashed_messages(with_categories=true) %} 
+      {% if messages %}
+          {% for category, message in messages %}
+            <div id="task-flash">
+              <p class="flash-{{ category }}">{{ message }}</p>
+            </div>
+          {% endfor %}
+      {% endif %}
+  {% endwith %}
+  <section class="tasks-section">
+      <table class="tasks-table">
+        <!--Table Header-->
+        <thead class="table-header">
+          <!--Table Header Row-->
+          <tr>
+              <!--Table Header Columns or Titles-->
+              <th class="task-title">Title</th>
+              <th class="task-description">Description</th>
+              <th class="task-deadline">Deadline</th>
+              <th class="task-priority">Priority</th>
+              <th class="task-status">Status</th>
+              <th class="task-options"></th>
+          </tr>
+        </thead>
+        <!--Table Data or body-->
+        <tbody id="task-body">
+          <!--Used jinja to iterate all task within tasks variable passed in flask one by one displaying its content-->
+          {% for task in tasks %}
+          <tr id="task-row">
+            <td>{{ task.title }}</td>         <!-- Access task title -->
+            <td>{{ task.description }}</td>   <!-- Access task description -->
+            <td>{{ task.deadline.strftime('%B %d, %Y @ %I:%M %p')  }}</td> <!-- Formatted deadline -->
+            <td>{{ task.priority }}</td>      <!-- Access task priority -->
+            <td class="task-status-data">
+              <!--Links to flask change_task_status route and passes task_id as a parameter to function-->
+              <!-- Class attribute: Add a base class "task-status" plus a dynamic class based on the task's status (lowercase, spaces replaced with dashes) -->
+              <!-- This lets you style each status differently using CSS selectors like ".task-status.in-progress" or ".task-status.complete" -->
+              <a href="{{ url_for('change_task_status', task_id=task.id)}}"
+              class="task-status {{ task.status | lower | replace(' ', '-') }}">
+                {{ task.status }} <!-- Access status of task-->
+              </a>
+            </td> 
+            <td>
+              <a> 
+                <!--Passing current task's values onto javascript-->
+                <button type="button" class="edit-button" onclick="openEditPopup(this, 'edit-task')"
+                  data-id="{{ task.id }}"                          
+                  data-title="{{ task.title }}"
+                  data-description="{{ task.description }}"
+                  data-priority="{{ task.priority }}"
+                  data-deadline="{{ task.deadline.strftime('%B %d %Y @ %I:%M %p')  }}"
+                  >
+                  Edit
+                </button>
+              </a>
+              <a href="{{ url_for('delete_task', task_id=task.id)}}"> <!--Links to flask delete_task route and passes task_id as a parameter to function-->
+                <button type="button" class="delete-button">Delete</button>
+              </a>
+            </td>
+          </tr>
+          <!--Else: no tasks display none across all 4 columns-->
+          {% else %}
+          <tr>
+            <td colspan="6">No tasks available.</td> 
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+  </section>
+
+
+  <!--Add Task Popup-->
+  <div class="popup" id="add-task">
+    <div class="popup-content">
+      <!--Form for adding task to database including title, description, priority, and deadline-->
+      <form method="POST" action="{{ url_for('add_task') }}">
+          <input type="text" name="title" placeholder="Title" maxlength="20" required> 
+          <br>
+          <textarea name="description" placeholder="Description" rows="4" cols="50"></textarea>
+          <br>
+          <label for="priority">Select Priority:</label>
+          <select name="priority" id="priority-list"required>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+          <br>
+          <label for="deadline">Choose Deadline:</label>
+          <input type="datetime-local" id="deadline" name="deadline" required>
+          <br>
+          <!--Button to close out of popup-->
+          <button type="button" onclick="closePopup('add-task')">Cancel</button>
+          <button type="submit">Confirm</button>
+      </form>
+    </div>
+  </div>
+
+  <!--Edit Task Popup-->
+  <div class="popup" id="edit-task">
+    <div class="popup-content">
+      <!--Form for editing task to database including title, description, priority, and deadline, action is replaced in javascript-->
+      <form method="POST" id="edit-form" action=""> 
+          <input type="text" name="title" id="edit-title" placeholder="Title" maxlength="20" required> 
+          <br>
+          <textarea name="description" id="edit-description" placeholder="Description" rows="4" cols="50"></textarea>
+          <br>
+          <label for="edit-priority-list">Select Priority:</label>
+          <select name="priority" id="edit-priority-list" required>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+          <br>
+          <label for="edit-deadline">Choose Deadline:</label>
+          <input type="datetime-local" id="edit-deadline" name="deadline" required>
+          <br>
+          <!--Button to close out of popup-->
+          <button type="button" onclick="closePopup('edit-task')">Cancel</button>
+          <button type="submit">Confirm</button>
+      </form>
+    </div>
+  </div>
+
+  
+
+  <!--Filter Popup-->
+  <div class="popup" id="filter-sort-task">
+    <div class="popup-content">
+      <!--Form for filtering task based on title, description, priority, and deadline-->
+      <form method="POST" action="{{ url_for('filter_sort_task') }}">
+          <label for="sort">Sort by:</label>
+          <select name="sort" id="sort" required>
+            <!--List of options for sort: by default, earliest is selected; otherwise previous option if present is selected as default-->
+            <option value="priority-ascending" {% if sort_title == 'priority' and sort_type == 'ascending' %}selected{% endif %}>Priority Ascending</option>
+            <option value="priority-descending" {% if sort_title == 'priority' and sort_type == 'descending' %}selected{% endif %}>Priority Descending</option>
+            <option value="deadline-ascending" {% if sort_title == 'deadline' and sort_type == 'ascending' %}selected{% endif %}>Deadline Ascending</option>
+            <option value="deadline-descending" {% if sort_title == 'deadline' and sort_type == 'descending' %}selected{% endif %}>Deadline Descending</option>
+            
+            <option value="status-complete" {% if sort_title == 'status' and sort_type == 'complete' %}selected{% endif %}>Status: Complete to In-Progress</option>
+            <option value="status-in-progress" {% if sort_title == 'status' and sort_type == 'in-progress' %}selected{% endif %}>Status: In-Progress to Complete</option>
+
+            <option value="latest" {% if sort_title == 'latest'%}selected{% endif %}>Latest</option>
+            <option value="earliest" {% if not sort_title or sort_title == 'earliest'%}selected{% endif %}>Earliest</option>
+          </select> <br>
+          <label for="filter">Filter by:</label> 
+            <!--Options for filter, everytime option is checked stored within list according to name; previous selected options will be checked if within lists-->
+            <fieldset>
+              <legend>Priority:</legend>
+              <label><input type="checkbox" name="priority" value="Low" {% if 'Low' in filter_priorities %}checked{% endif %}> Low</label><br>
+              <label><input type="checkbox" name="priority" value="Medium" {% if 'Medium' in filter_priorities %}checked{% endif %}> Medium</label><br>
+              <label><input type="checkbox" name="priority" value="High" {% if 'High' in filter_priorities %}checked{% endif %}> High</label><br>
+            </fieldset>
+             <fieldset>
+              <legend>Status:</legend>
+              <label><input type="checkbox" name="status" value="Complete" {% if 'Complete' in filter_status %}checked{% endif %}> Complete</label><br>
+              <label><input type="checkbox" name="status" value="In-Progress" {% if 'In-Progress' in filter_status %}checked{% endif %}> In-Progress</label><br>
+            </fieldset>
+            <fieldset>
+              <legend>Month:</legend>
+              <label><input type="checkbox" name="month" value="1" {% if 1 in filter_months %}checked{% endif %}> January</label>
+              <label><input type="checkbox" name="month" value="2" {% if 2 in filter_months %}checked{% endif %}> February</label>
+              <label><input type="checkbox" name="month" value="3" {% if 3 in filter_months %}checked{% endif %}> March</label>
+              <label><input type="checkbox" name="month" value="4" {% if 4 in filter_months %}checked{% endif %}> April</label> <br>
+              <label><input type="checkbox" name="month" value="5" {% if 5 in filter_months %}checked{% endif %}> May</label>
+              <label><input type="checkbox" name="month" value="6" {% if 6 in filter_months %}checked{% endif %}> June</label>
+              <label><input type="checkbox" name="month" value="7" {% if 7 in filter_months %}checked{% endif %}> July</label>
+              <label><input type="checkbox" name="month" value="8" {% if 8 in filter_months %}checked{% endif %}> August</label> <br>
+              <label><input type="checkbox" name="month" value="9" {% if 9 in filter_months %}checked{% endif %}> September</label>
+              <label><input type="checkbox" name="month" value="10" {% if 10 in filter_months %}checked{% endif %}> October</label>
+              <label><input type="checkbox" name="month" value="11" {% if 11 in filter_months %}checked{% endif %}> November</label>
+              <label><input type="checkbox" name="month" value="12" {% if 12 in filter_months %}checked{% endif %}> Decemeber</label> <br>
+            </fieldset>
+            <fieldset>
+              <legend>Year:</legend>
+              <input type="number" id="year-filter" name="year-filter" placeholder="Year" min="1900" value="{{ filter_year }}">
+            </fieldset>
+              <fieldset>
+            <legend>Day:</legend>
+              <input type="number" id="day-filter" name="day-filter" placeholder="Day" min="1" max="31" value="{{ filter_day}}">
+            </fieldset>
+            <button type="submit" name="action" class="reset-button" value="reset">Reset</button>
+          </select> <br>
+          <!--Button to close out of popup-->
+          <button type="button" onclick="closePopup('filter-sort-task')">Cancel</button>
+          <button type="submit" name="action" value="apply">Confirm</button>
+      </form>
+    </div>
+  </div>
+
+
+  <!--Link to JavaScript-->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+{% endblock %}

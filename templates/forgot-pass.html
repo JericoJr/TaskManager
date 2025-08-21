@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Forgot Password</title>
+      <!-- Link to stylesheet or CSS -->
+      <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body class="forgot-password-page">
+    <h2 class="forgot-password-title">Forgot Password</h2>
+    <a href="{{ url_for('login')}}" class="back-button-box">
+      <button type="button" class="back-button"> < back</button>
+    </a>
+    <section id="forgot-password-section">
+      <div class="all-forms" id="forgot-password-box">
+        <!--Users will get a form of email and a code, where random code will be sent to email-->
+        <form method="POST" action="/generate_code">
+          <input type="email" name="email" placeholder="Your Email" required>
+          <button type="submit" >Send Code</button>
+        </form>
+        <!--Checks code, if correct moves on to forget password-->
+        <form method="POST" action="/check_code">
+          <input type="text" name="code" placeholder="Enter Code" required>
+          <button type="submit" >Submit</button> 
+        </form>
+
+        <!--Checks if code is verified, if true display forgot password form-->
+        {% if code_verified %}
+        <form method="POST" action="/forgot_password">
+          <input type="text" name="password" placeholder="Enter New Password" required>
+          <button type="submit" >Change Password</button> 
+        </form>
+        {% endif %}
+
+        <!--Flash Messages for Login Note: different types like 'success' and 'error'-->
+        {% with messages = get_flashed_messages(with_categories=true) %} 
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="flash-{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+      </div>
+    </section>
+
+  </body>
+</html>

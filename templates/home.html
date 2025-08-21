@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+  <h1 class="title-page">Task Manager App</h1>
+  <h2 class="welcome" style="margin-bottom: 0;">Welcome {{ user.username }}!</h2> <!--Welcomes user and gets their username-->
+  <div class="dashboard">
+    <!--Progress Bar-->
+    <section class="progress-section">
+        <div class="progress-labels">
+            <h3>Tasks Completed</h3>
+            <h3>Total Tasks</h3>
+        </div>
+        <progress value="{{ tasks_complete_count }}" max="{{ tasks_count }}" class="progress-bar"></progress>
+    </section>
+
+    <!--Calendar section-->
+    <section class="calendar-section">
+        <div class="calendar-title">
+            <h2>Calendar</h2>
+        </div>
+        <!--Displays current month and year while having buttons to move to prev or next month-->
+        <div class="calendar-month-year">
+            <!--Goes to prev_month route while passing month and year value; month(left-name of URL parameter)=month(right-actual month value)-->
+            <a href="{{ url_for('prev_month', month=month, year=year)}}" >
+                <button class="prev-month" >Prev</button>
+            </a>
+            <button type="button" class="month-year-button" onclick="openPopup('calendar-popup')">{{ month_name }} {{ year }}</button>
+            <a href="{{ url_for('next_month', month=month, year=year)}}">
+                <button class="next-month">Next</button>
+            </a>
+        </div>
+        <!--Displays the days within the month-->
+        <div class="calendar-content">
+            <!--Header for days-->
+            <div class="calendar-header-day">
+                <h3>
+                    Sunday
+                </h3>
+                <h3>
+                    Monday
+                </h3>
+                <h3>
+                    Tuesday
+                </h3>
+                <h3>
+                    Wednesday
+                </h3>
+                    <h3>
+                    Thursday
+                </h3>
+                <h3>
+                    Friday
+                </h3>
+                <h3>
+                    Saturday
+                </h3>
+            </div>
+            <!--Current number and days within month-->
+            <div class="calendar-days">
+                <!--Iterates over 2D array list, month_days, by row known as weeks-->
+                {% for week in month_days %} 
+                    <!--Iterates the columns known as days within the row or week-->
+                    {% for day in week %}
+                        <!--Within the columns, numbered by the day, if 0 means empty other populate that day with its correct number-->
+                        {% if day == 0 %}
+                            <div class="calendar-day empty"></div>
+                        {% else %}
+                            <!-- Each calendar cell gets class 'calendar-day'. If the day matches today's date (day, month, and year), add the 'today' class as well -->
+                            <!-- If current day, CSS for that class is called '.calendar-day.today' otherwise just '.calendar-day'-->
+                            <div class="calendar-day {% if day == today.day and month == today.month and year == today.year %}today{% endif %}">
+                                <p class="day-number">
+                                    {{ day }}
+                                </p>
+                                <div class="day-tasks">
+                                    <!--Create a mutable namespace object `ns` with two properties: integer count and boolean show_more -->
+                                    {% set ns = namespace(count=3, show_more=false) %}
+                                    <!--Iterates to list with all the task of the same month and year-->
+                                    {% for task in tasks_list %}
+                                        <!--If task's date is the same as the current day, display task title-->
+                                        {% if task.deadline.day == day %}
+                                            <!--Limits each day with 3 tasks, if > 3 tasks display more buttom-->
+                                            {% if ns.count > 0 %}
+                                                {% set ns.count = ns.count - 1 %}
+                                                {% set ns.show_more = true %}
+                                                <button type="button" class="cal-task {{ task.priority | lower }}" onclick="openTaskPopup(this, 'task-info-popup')"
+                                                    task-id="{{ task.id }}"                          
+                                                    task-title="{{ task.title }}"
+                                                    task-description="{{ task.description }}"
+                                                    task-priority="{{ task.priority }}"
+                                                    task-deadline="{{ task.deadline.strftime('%B %d, %Y @ %I:%M %p') }}"
+                                                > 
+                                                    {{ task.title }} 
+                                                </button>
+                                            <!--Displays more button if current day has 3 or more tasks; Directs to correpsonding route while passing and formating the task-->
+                                            {% elif ns.show_more == true %}
+                                                {% set ns.show_more = false %}
+                                                <a href="{{ url_for('view_more_tasks', deadline=task.deadline.strftime('%Y-%m-%d'))}}">
+                                                    <button type="button" class="more-button"> More </button>
+                                                </a>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        
+        </div>
+    </section>
+
+    <!--Holds Both Summary and Reminder Section within one row-->
+    <div class="sumrem-section">
+        <!--Holds the Summary Section which displays the current tasks that are due today and this week as well as any overdue tasks-->
+        <section class="summary-section">
+            <h2 style="margin:0; margin-bottom: 5px; color: whitesmoke; margin-left: 15px;">Summary</h2>
+            <div class="summary-box">
+                <div class="summary-content">
+                    <div class="due-today">
+                        <p>Tasks Due Today:</p>
+                        <h4>{{ tasks_due_today }}</h4>
+                    </div>
+                    <div class="due-week">
+                        <p>Tasks Due this Week:</p>
+                        <!--Gets length of the tasks_due_week list which holds the count of tasks due that week-->
+                        <h4>{{ tasks_due_week | length }}</h4>
+                    </div>
+                    <div class="overdue-tasks">
+                        <p>Overdue Tasks:</p>
+                        <h4>{{ tasks_overdue }}</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!--Holds the reminders section which display top 3 tasks that are due the closest according to its deadline, starts at today's date-->
+        <section class="reminders-section">
+            <h2 style="margin:0; margin-bottom: 5px; color: whitesmoke; margin-left: 10px;">Reminders</h2>
+            <div class="reminder-box">
+                <table class="reminder-table">
+                    <tr class="reminder-header">
+                        <th></th>
+                        <th>Title</th>
+                        <th>Priority</th>
+                        <th>Due</th>
+                    </tr>
+                    <tr class="task1">
+                        <th>🎯Task #1:</th>
+                        <!--Checks if list length is not empty-->
+                        {% if reminderTasks|length > 0 %}
+                            <!--Input values of task from list-->
+                            <td>
+                                <!--Links to task.html to view more task, where it filters the tasks by deadline-->
+                                <a href="{{ url_for('view_more_tasks', deadline=reminderTasks[0].deadline.strftime('%Y-%m-%d'))}}" class="reminder-task">
+                                    {{ reminderTasks[0].title }}
+                                </a>
+                            </td>
+                            <td class="reminder-priority {{ reminderTasks[0].priority | lower }}">{{ reminderTasks[0].priority}}</td>
+                            <!--Checks if tasks deadline is today, display today. Otherwise, display the number of days left to next task's deadline-->
+                            {% if reminderTasks[0].deadline.date() == today %}
+                                <td class="deadlime-today" style="color: rgb(255, 0, 0); font-weight: bold;">Today</td>
+                            {% else %}
+                                <td class="deadline-later" style="color: rgb(255, 217, 27); font-weight: bold;">in {{ (reminderTasks[0].deadline.date() - today).days }} days</td>
+                            {% endif %}
+                        {% else %}
+                            <!--If no future tasks, display no upcoming tasks-->
+                            <td colspan="3" class="no-upcoming">No upcoming tasks.</td>
+                        {% endif %}
+                    </tr>
+                    <tr class="task2">
+                        <th>🎯Task #2:</th>
+                        <!--Checks if list length has more than 1 tasks-->
+                        {% if reminderTasks|length > 1 %}
+                            <!--Input values of task from list-->
+                            <td>
+                                <!--Links to task.html to view more task, where it filters the tasks by deadline-->
+                                <a href="{{ url_for('view_more_tasks', deadline=reminderTasks[1].deadline.strftime('%Y-%m-%d'))}}" class="reminder-task">
+                                    {{ reminderTasks[1].title }}
+                                </a>
+                            </td>
+                            <td class="reminder-priority {{ reminderTasks[1].priority | lower }}">{{ reminderTasks[1].priority}}</td>
+                            <!--Checks if tasks deadline is today, display today. Otherwise, display the number of days left to next task's deadline-->
+                            {% if reminderTasks[1].deadline.date() == today %}
+                                <td class="deadline-today" style="color: rgb(255, 0, 0); font-weight: bold;">Today</td>
+                            {% else %}
+                                <td class="deadline-later" style="color: rgb(255, 217, 27); font-weight: bold;">in {{ (reminderTasks[1].deadline.date() - today).days }} days</td>
+                            {% endif %}
+                        {% else %}
+                            <!--If no future tasks, display no upcoming tasks-->
+                            <td colspan="3" class="no-upcoming">No upcoming tasks.</td>
+                        {% endif %}
+                    </tr>
+                    <tr class="task3">
+                        <th>🎯Task #3:</th>
+                          <!--Checks if list length has more than 2 tasks-->
+                        {% if reminderTasks|length > 2 %}
+                             <!--Input values of task from list-->
+                            <td>
+                                <!--Links to task.html to view more task, where it filters the tasks by deadline-->
+                                <a href="{{ url_for('view_more_tasks', deadline=reminderTasks[2].deadline.strftime('%Y-%m-%d'))}}" class="reminder-task">
+                                    {{ reminderTasks[2].title }}
+                                </a>
+                            </td>
+                            <td class="reminder-priority {{ reminderTasks[2].priority | lower }}">{{ reminderTasks[2].priority}}</td>
+                            <!--Checks if tasks deadline is today, display today. Otherwise, display the number of days left to next task's deadline-->
+                            {% if reminderTasks[2].deadline.date() == today %}
+                                <td class="deadline-today" style="color: rgb(255, 0, 0); font-weight: bold;">Today</td>
+                            {% else %}
+                                <td class="deadline-later" style="color: rgb(255, 217, 27); font-weight: bold;">in {{ (reminderTasks[2].deadline.date() - today).days }} days</td>
+                            {% endif %}
+                        {% else %}
+                            <!--If no future tasks, display no upcoming tasks-->
+                            <td colspan="3" class="no-upcoming">No upcoming tasks.</td>
+                        {% endif %}
+                    </tr>
+                </table>
+            </div>
+        </section>
+    </div>
+   
+    <section class="stats-section">
+        <h2 class="stats-title" style="margin:0; margin-bottom: 5px; color: whitesmoke; margin-left: 15px; font-family: Bahnschrift SemiBold;">Overall Statistics:</h2>
+        <div class="stats-box">
+            <table class="stats-table">
+                <tr class="total-tasks">
+                    <th>Total Tasks:</th>
+                    <td>{{ tasks_count }}</td>
+                </tr>
+                <tr class="complete-tasks">
+                    <th>Tasks Completed:</th>
+                    <td>{{ tasks_complete_count }}</td>
+                </tr>
+                <tr class="in-progress-tasks">
+                    <th>Tasks In-Progress:</th>
+                    <td>{{ tasks_count - tasks_complete_count }}</td>
+                </tr>
+                <tr class="high-priority-tasks">
+                    <th>High Priority Tasks:</th>
+                    <td>{{ high_tasks }}</td>
+                </tr>
+                <tr class="medium-priority-tasks">
+                    <th>Medium Priority Tasks:</th>
+                    <td>{{ medium_tasks }}</td>
+                </tr>
+                 <tr class="low-priority-tasks">
+                    <th>Low Priority Tasks:</th>
+                    <td>{{ low_tasks }}</td>
+                </tr>
+                  <tr class="high-priority-tasks-completed">
+                    <th>High Priority Tasks Completed:</th>
+                    <td>{{ high_tasks_completed }}</td>
+                </tr>
+                <tr class="medium-priority-tasks-completed">
+                    <th>Medium Priority Tasks Completed:</th>
+                    <td>{{ medium_tasks_completed }}</td>
+                </tr>
+                <tr class="low-priority-tasks-completed">
+                    <th>Low Priority Tasks:</th>
+                    <td>{{ low_tasks_completed }}</td>
+                </tr>
+                <tr class="tasks-month">
+                    <th>Total Tasks in {{ month_name }}:</th>
+                    <td>{{ tasks_in_month }}</td>
+                </tr>
+                <tr class="tasks-completed-month">
+                    <th>Completed Tasks in {{ month_name }}:</th>
+                    <td>{{ completed_tasks_in_month }}</td>
+                </tr>
+            </table>
+        </div>
+    </section>
+  </div>
+
+
+<!--Calendar popup-->
+<div class="popup" id="calendar-popup">
+    <div class="popup-content">
+        <form method="POST" action="{{ url_for('change_date')}}">
+            <label for="date" style="font-size: 16px;">Choose Date:</label> 
+            <input type="date" id="date" name="date" required> <br>
+            <button type="button" onclick="closePopup('calendar-popup')">Cancel</button>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+<!--Task Info Popup-->
+<div class="popup" id="task-info-popup">
+    <div class="popup-content">
+        <h3>Task Title:</h3>
+        <p id="display-title"></p>
+        <br>
+        <h3>Description:</h3>
+        <br>
+        <p id="display-description"></p>
+        <br>
+        <h3>Priority:</h3>
+        <p id="display-priority"></p>
+        <br>
+        <h3>Deadline:</h3>
+        <p id="display-deadline"></p>
+        <br>
+        <button type="button" onclick="closePopup('task-info-popup')">Cancel</button>    
+    </div>
+</div>
+
+<!--Link to JavaScript-->
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+{% endblock %}
+

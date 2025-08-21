@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+  <h1 class="title-page">Settings</h1>
+
+  <div class="settings">
+        <section class="account">
+            <h2 class="subtitle">Account</h2>
+            <section class="account-items">
+                <!--Clicking change name header will trigger a change name popup based on id ('change-name')-->
+                <a href="#" onclick="openPopup('change-name')">Change Name</a> <br>
+                <!--Clicking change password header will trigger a change password popup-->
+                <a href="#" onclick="openPopup('change-password')">Change Password</a> <br>
+                <!--Clicking delete account header will trigger a delete account popup-->
+                <a href="#" onclick="openPopup('delete-account')">Delete Account</a>
+                <!--Flash Messages for Login Note: different types like 'success' and 'error'-->
+            </section>
+        </section>
+        <section class="preferences">
+            <h2 class="subtitle">Preferences</h2>
+            <section class="preferences-items">
+                <!--Clicking email notifications header will trigger a email notifications popup-->
+                <a href="#" onclick="openPopup('notifications')" >Email Notifications</a> <br>
+                <!--Clicking delete data header will trigger a delete data popup-->
+                <a href="#" onclick="openPopup('delete-data')">Delete Data</a>
+            </section>
+            {% with messages = get_flashed_messages(with_categories=true) %} 
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <p class="flash-{{ category }}" id="settings-alert">{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </section>
+  
+        <div class="signout-section">
+            <form action="{{ url_for('signout') }}" method="post">
+                <button type="submit" class="signout">Sign Out</button>
+            </form>
+        </div>
+
+        <!--Popups-->
+        <!--Change Name Popup-->
+        <div class="popup" id="change-name">
+            <div class="popup-content">
+                <form method="POST" action="{{ url_for('change_name') }}">
+                    <input type="text" name="username" placeholder="Change Username"> 
+                    <br>
+                    <input type="text" name="first" placeholder="Change First Name">
+                    <input type="text" name="last" placeholder="Change Last Name"> 
+                    <br>
+                    <!--Button to close out of popup-->
+                    <button type="button" onclick="closePopup('change-name')">Cancel</button>
+                    <button type="submit">Confirm</button>
+                </form>
+            </div>
+        </div>
+
+        <!--Change Password Popup-->
+        <div class="popup" id="change-password">
+            <div class="popup-content">
+                <form method="POST" action="{{ url_for('change_password') }}">
+                    <input type="password" name="password" placeholder="Change Password" required> 
+                    <br>
+                    <!--Button to close out of popup-->
+                    <button type="button" onclick="closePopup('change-password')">Cancel</button>
+                    <button type="submit">Confirm</button>
+                </form>
+            </div>
+        </div>
+
+        <!--Delete Account Popup-->
+        <div class="popup" id="delete-account">
+            <form method="POST" action="{{ url_for('delete_account') }}">
+                <label>Sure you want to delete your Account?</label>  <br>
+                <button type="submit" name="delete">Yes</button>
+                <button type="button" onclick="closePopup('delete-account')">No</button>
+            </form>
+        </div>
+
+        <!--Email Notifications Popup-->
+        <div class="popup" id="notifications">
+            <form method="POST" action="{{ url_for('notifications') }}">
+                <label>Turn off email notification?</label>  <br>
+                <label>
+                    <input type="radio" name="result" value="yes"> Yes 
+                </label>
+                <label>
+                    <input type="radio" name="result" value="no" required> No
+                </label> 
+                <br>
+                <button type="submit" onclick="closePopup('notifications')">Submit</button>
+            </form>
+        </div>
+
+        <!--Delete Data Popup-->
+        <div class="popup" id="delete-data">
+            <form method="POST" action="{{ url_for('delete_data') }}">
+                <label>Sure you want to clear all data of this Account?</label>  <br>
+                <button type="submit" name="delete-date">Yes</button>
+                <button type="button" onclick="closePopup('delete-data')">No</button>
+            </form>
+        </div>
+
+        
+  </div>
+
+
+  <!--Link to JavaScript-->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+{% endblock %}
