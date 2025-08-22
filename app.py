@@ -1,6 +1,7 @@
 # import for random numbers
 import random
 
+import os
 import calendar
 
 from datetime import datetime, timedelta, date, timezone
@@ -19,14 +20,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from flask_apscheduler import APScheduler
 
-# Create an instance of the Flask class to start the app
-app = Flask(__name__)
+# Create Flask app and set instance_relative_config to True so we can use the instance folder
+app = Flask(__name__, instance_relative_config=True)
+# Ensure the instance folder exists
+os.makedirs(app.instance_path, exist_ok=True)
 
 # Secret key is needed to keep client sessions secure
 app.secret_key = 'your_secret_key_here'  # Replace with a strong secret key for security!
 
-# Configure the SQLite database URI (file-based database named customers.db)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///customers.db'
+# Configure a single consistent SQLite database path
+db_path = os.path.join(app.instance_path, 'taskmanager.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 
 # Email configuration (for example, using Gmail)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'

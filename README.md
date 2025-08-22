@@ -29,5 +29,5 @@ Follow these steps to get the project up and running locally:
 
 3. **Run Flask App**
     i. "python app.py"
-    ii. Access App by clicking on this link: "http://127.0.0.1:5000"
+    ii. Access App by clicking on this link: "http://127.0.0.1:5000" (Click on using CTRL)
 
