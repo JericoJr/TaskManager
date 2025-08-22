@@ -26,7 +26,7 @@ app = Flask(__name__, instance_relative_config=True)
 os.makedirs(app.instance_path, exist_ok=True)
 
 # Secret key is needed to keep client sessions secure
-app.secret_key = 'your_secret_key_here'  # Replace with a strong secret key for security!
+app.secret_key = os.environ.get('SECRET_KEY', 'e9b1a42c7f3d8e59b6f2041a8d72c5e1') # 'SECRET_KEY' is the name of the environment variable you want to read, the next parameter is the actual secret key value
 
 # Configure a single consistent SQLite database path
 db_path = os.path.join(app.instance_path, 'taskmanager.db')
