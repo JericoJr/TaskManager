@@ -337,7 +337,7 @@ button:hover {
     gap: 20px; /*Space between elements*/
 }
 
-.summary-content div {
+.due-today, .due-week, .overdue-tasks {
     padding: 10px 10px 10px 10px;
     width: 30%;
     aspect-ratio: 1 / 1;
@@ -363,11 +363,15 @@ button:hover {
 }
 
 .text {
-    border: 2px solid lime;
     border-radius: 0px;
-    height: 60%;
-    width: 60%;
-    box-sizing: border-box;
+    height: 80%;
+    width: 80%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* or space-between */
+    align-items: center;
+    text-align: center;
 }
 
 .text > * { /*Gets all child elements of parent element*/
