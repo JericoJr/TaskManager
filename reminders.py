@@ -1,6 +1,11 @@
-from flask_mail import Message
-from datetime import datetime, timedelta, timezone
-from app import db, app, mail, Task, User
+from flask_mail import Message                         # Import Message class to construct emails
+from datetime import datetime, timedelta, timezone     # Import date/time utilities
+from app import db, app, mail, Task, User               # Import app components and database models
+from flask_apscheduler import APScheduler               # Import scheduler for periodic jobs
+import time
+from flask import jsonify
+
+scheduler = APScheduler()                               # Create a scheduler instance
 
 # Create a 24-hour reminder email notification for users' task
 def task_reminders():
@@ -37,8 +42,32 @@ def task_reminders():
                 # Send the email via Flask-Mail
                 mail.send(msg)
 
+def start_scheduler():
+    scheduler.init_app(app)                                # Initialize scheduler with Flask app context
+    scheduler.start()                                      # Start the scheduler running
+    # Schedule task_reminders to run every hour by interval trigger
+    scheduler.add_job(func=task_reminders, trigger='interval', id='send_reminders', hours=1)
 
-# This block runs the reminders only if this script is executed directly (not imported)
+
+# Define a route /send_reminders that accepts GET requests
+@app.route('/send_reminders', methods=['GET'])
+def send_reminders():
+    # Returns a JSON response indicating success or error.
+    try:
+        # Call your existing function to check tasks and send reminder emails
+        task_reminders()
+        
+        # If successful, return a JSON response with status and message
+        return jsonify({"status": "success", "message": "Reminders sent"}), 200
+    
+    except Exception as e:
+        # If any error occurs, catch it and return JSON with error info
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+
+# Run this block only if this script is executed directly (not imported)
 if __name__ == "__main__":
     with app.app_context():
-        task_reminders() # functions checks task database for any upcoming deadlines, and sends email
+        task_reminders()                                   # Run reminders once immediately (for testing)
+    start_scheduler()                                      # Then start the periodic scheduler

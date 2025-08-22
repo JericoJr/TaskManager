@@ -1,0 +1,15 @@
+name: Send Task Reminders
+
+# Schedule this workflow to run every hour
+on:
+  schedule:
+    - cron: '0 * * * *'   # Runs at minute 0 of every hour
+  workflow_dispatch:       # Allows manual triggering from GitHub UI
+
+jobs:
+  send_reminders:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call reminder endpoint
+        run: curl -s -o /dev/null -w "%{http_code}" https://yourdomain.com/send_reminders

@@ -18,7 +18,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 # Import email notifications
 from flask_mail import Mail, Message
-from flask_apscheduler import APScheduler
 
 # Create Flask app and set instance_relative_config to True so we can use the instance folder
 app = Flask(__name__, instance_relative_config=True)
