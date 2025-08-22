@@ -281,22 +281,27 @@ button:hover {
 .sumrem-section {
     display: flex; /*Flex layout: Arranges elements in one dimension (horizontal or vertical) */
     flex-direction: row; /*arranges elements horizontally*/
+    flex-wrap: wrap;
     background-color: #392e20;
     border-radius: 10px;
     padding-bottom: 20px;
     padding-top: 10px;
-    height: 400px;
+    height: auto;
+    width: 100%;
+    box-sizing: border-box;
     /*border: 8px orange solid;*/
+
 }
 
 .summary-section {
-    flex: 0 0 50%;              /* Flex shorthand: flex-grow, flex-shrink, flex-basis */
+    flex: 1 1 50%;              /* Flex shorthand: flex-grow, flex-shrink, flex-basis */
                                 /* flex-grow: 0 -> don't grow larger than flex-basis */
                                 /* flex-shrink: 0 -> don't shrink smaller than flex-basis */
                                 /* flex-basis: 70% -> initial size is 50% width of parent container */
     /*border: 3px solid lime;*/
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
 }
 
 .summary-box {
@@ -306,12 +311,17 @@ button:hover {
     align-items: center;
     margin-left: 40px;
     width: 90%; 
-    height: 300px;
+    max-width: 800px;     /* Prevents growing too big */
+    min-width: 300px;     /* Prevents shrinking too small */
+    height: auto;
     background-color: #aa9071;
     border: 6px solid  rgb(125, 102, 59);
     border-radius: 5%;
     padding-left: 10px;
     padding-right: 10px;
+    padding-bottom: 20px;
+    padding-top: 20px;
+    box-sizing: border-box;
 }
 
 .summary-content {
@@ -320,16 +330,18 @@ button:hover {
     justify-content: center;
     align-items: center;
     width: 100%;
+    max-width: 800px;
+    min-width: 300px;
     border-radius: 20%;
-    height: 80%;
-    gap: 50px;
+    height: auto;
+    gap: 20px; /*Space between elements*/
 }
 
 .summary-content div {
     padding: 10px 10px 10px 10px;
     width: 30%;
-    height: 65%;
-    border-radius: 200%;
+    aspect-ratio: 1 / 1;
+    border-radius: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -350,29 +362,133 @@ button:hover {
     background-color: red;
 }
 
-
-.due-today > *, .due-week > *, .overdue-tasks > * { /*Gets all child elements of parent element*/
-    color: white;
-    font-family: Georgia, 'Times New Roman', Times, serif;
+.text {
+    border: 2px solid lime;
+    border-radius: 0px;
+    height: 60%;
+    width: 60%;
+    box-sizing: border-box;
 }
 
-.summary-content div p {
+.text > * { /*Gets all child elements of parent element*/
+    color: rgb(65, 1, 1);
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    text-align: center;
+    margin: 0;
+}
+
+.text p {
     font-family: Impact;
     font-size: large;
     margin: 0;
 }
 
-.summary-content div h4 {
+.text h4 {
     margin: 0;
     font-family: Impact;
     font-size: 36px;
 }
 
 .reminders-section {
-    flex: 0 0 50%;  
+    flex: 1 1 50%;  
     /*border: 3px solid violet;*/
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
+}
+
+
+.reminder-box {
+    display: flex;
+    flex-direction: row;  
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    height: auto;
+    box-sizing: border-box;
+}
+
+.reminder-table {
+    display: flex;
+    flex-direction: column;
+    border: 6px solid rgb(159, 131, 95);
+    border-radius: 10px;
+    background-color: rgb(125, 102, 59);
+    width: 90%;
+    height: auto;
+}
+
+.reminder-table tr {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    width: 100%;
+    margin-bottom: 40px;
+}
+
+.reminder-header th {
+    width: 25%;
+    font-size: large;
+    margin-top: 5px;
+    border-bottom: whitesmoke solid 2px;
+    color: whitesmoke;
+}
+
+.task1 th, .task2 th, .task3 th, .task1 td, .task2 td, .task3 td {
+    display: flex;
+    width: 25%;
+    align-items: center;
+    justify-content: center;
+    font-size: large;
+    color: whitesmoke;
+}
+
+
+.task1 td a, .task2 td a, .task3 td a {
+    color: whitesmoke;
+    font-weight: bold;
+}
+
+.task1 td a:hover, .task2 td a:hover, .task3 td a:hover {
+    color: darkblue;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+
+.reminder-task {
+    text-decoration: none;
+    color: black;
+}
+
+
+.reminder-task:hover {
+    text-decoration: underline;
+}
+
+.reminder-priority.high {
+    color:rgb(255, 0, 0);
+    font-weight: bold;
+}
+
+.reminder-priority.medium {
+    color:rgb(255, 119, 0);
+    font-weight: bold;
+}
+
+.reminder-priority.low {
+    color:rgb(7, 206, 40);
+    font-weight: bold;
+}
+
+.deadline-later {
+    color: rgb(79, 79, 79); 
+    font-weight: bold;
+}
+
+.deadline-today {
+    color: rgb(194, 2, 2); 
+    font-weight: bold;
 }
 
 .progress-section {
@@ -468,7 +584,7 @@ button:hover {
     width: 25%;
 }
 
-/* Styles each task base don their priority*/
+/* Styles each task base on their priority*/
 .cal-task {
     border-radius: 5px;
     font-weight: bold;
@@ -625,96 +741,6 @@ button:hover {
     justify-content: center;
 }
 
-.reminder-box {
-    display: flex;
-    flex-direction: row;  
-    align-items: center;
-    justify-content: center;
-    margin: 0;
-}
-
-.reminder-table {
-    display: flex;
-    flex-direction: column;
-    border: 6px solid rgb(159, 131, 95);
-    border-radius: 10px;
-    background-color: rgb(125, 102, 59);
-    width: 90%;
-    height: 300px;
-}
-
-.reminder-table tr {
-    display: flex;
-    flex-direction: row;
-    margin: 0;
-    width: 100%;
-    margin-bottom: 40px;
-}
-
-.reminder-header th {
-    width: 25%;
-    font-size: large;
-    margin-top: 5px;
-    border-bottom: whitesmoke solid 2px;
-    color: whitesmoke;
-}
-
-.task1 th, .task2 th, .task3 th, .task1 td, .task2 td, .task3 td {
-    display: flex;
-    width: 25%;
-    align-items: center;
-    justify-content: center;
-    font-size: large;
-    color: whitesmoke;
-}
-
-
-.task1 td a, .task2 td a, .task3 td a {
-    color: whitesmoke;
-    font-weight: bold;
-}
-
-.task1 td a:hover, .task2 td a:hover, .task3 td a:hover {
-    color: darkblue;
-    font-weight: bold;
-    text-decoration: underline;
-}
-
-
-.reminder-task {
-    text-decoration: none;
-    color: black;
-}
-
-
-.reminder-task:hover {
-    text-decoration: underline;
-}
-
-.reminder-priority.high {
-    color:rgb(255, 0, 0);
-    font-weight: bold;
-}
-
-.reminder-priority.medium {
-    color:rgb(255, 119, 0);
-    font-weight: bold;
-}
-
-.reminder-priority.low {
-    color:rgb(7, 206, 40);
-    font-weight: bold;
-}
-
-.deadline-later {
-    color: rgb(79, 79, 79); 
-    font-weight: bold;
-}
-
-.deadline-today {
-    color: rgb(194, 2, 2); 
-    font-weight: bold;
-}
 
 /* Settings Styling */
 

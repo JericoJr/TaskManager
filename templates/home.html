@@ -120,17 +120,23 @@
             <div class="summary-box">
                 <div class="summary-content">
                     <div class="due-today">
-                        <p>Tasks Due Today:</p>
-                        <h4>{{ tasks_due_today }}</h4>
+                        <div class="text">
+                            <p>Tasks Due Today:</p>
+                            <h4>{{ tasks_due_today }}</h4>
+                        </div>
                     </div>
                     <div class="due-week">
-                        <p>Tasks Due this Week:</p>
-                        <!--Gets length of the tasks_due_week list which holds the count of tasks due that week-->
-                        <h4>{{ tasks_due_week | length }}</h4>
+                        <div class="text">
+                            <p>Tasks Due this Week:</p>
+                            <!--Gets length of the tasks_due_week list which holds the count of tasks due that week-->
+                            <h4>{{ tasks_due_week | length }}</h4>
+                        </div>
                     </div>
                     <div class="overdue-tasks">
-                        <p>Overdue Tasks:</p>
-                        <h4>{{ tasks_overdue }}</h4>
+                        <div class="text">
+                            <p>Overdue Tasks:</p>
+                            <h4>{{ tasks_overdue }}</h4>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -161,6 +167,8 @@
                             <!--Checks if tasks deadline is today, display today. Otherwise, display the number of days left to next task's deadline-->
                             {% if reminderTasks[0].deadline.date() == today %}
                                 <td class="deadlime-today" style="color: rgb(255, 0, 0); font-weight: bold;">Today</td>
+                            {% elif reminderTasks[0].deadline.date() == today + timedelta(days=1) %}
+                                <td class="deadlime-tommorow" style="color: rgb(255, 119, 0); font-weight: bold;">Tommorow</td>
                             {% else %}
                                 <td class="deadline-later" style="color: rgb(255, 217, 27); font-weight: bold;">in {{ (reminderTasks[0].deadline.date() - today).days }} days</td>
                             {% endif %}

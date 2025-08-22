@@ -371,7 +371,7 @@ def home():
         today=today, tasks_list=tasks_list, tasks_count=tasks_count, tasks_complete_count=tasks_complete_count, high_tasks=high_tasks,
         medium_tasks=medium_tasks, low_tasks=low_tasks, high_tasks_completed=high_tasks_completed, medium_tasks_completed=medium_tasks_completed,
         low_tasks_completed=low_tasks_completed, tasks_in_month=tasks_in_month, completed_tasks_in_month=completed_tasks_in_month, 
-        tasks_due_today=tasks_due_today, tasks_due_week=tasks_due_week, tasks_overdue=tasks_overdue, reminderTasks=reminderTasks)
+        tasks_due_today=tasks_due_today, tasks_due_week=tasks_due_week, tasks_overdue=tasks_overdue, reminderTasks=reminderTasks, timedelta=timedelta)
 
 def reminderTasksList():
     user_id = session.get('user_id')
