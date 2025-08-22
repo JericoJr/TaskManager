@@ -1,9 +1,9 @@
 from flask_mail import Message                         # Import Message class to construct emails
 from datetime import datetime, timedelta, timezone     # Import date/time utilities
 from app import db, app, mail, Task, User               # Import app components and database models
-from flask_apscheduler import APScheduler               # Import scheduler for periodic jobs
 import time
 from flask import jsonify
+from flask_apscheduler import APScheduler               # Import scheduler for periodic jobs
 
 scheduler = APScheduler()                               # Create a scheduler instance
 
@@ -49,7 +49,7 @@ def start_scheduler():
     scheduler.add_job(func=task_reminders, trigger='interval', id='send_reminders', hours=1)
 
 
-# Define a route /send_reminders that accepts GET requests
+# Define a route /send_reminders that accepts GET requests; This route is Triggered automatically because GitHub Actions, which is run every hour, sends Get Request to that Flask Route
 @app.route('/send_reminders', methods=['GET'])
 def send_reminders():
     # Returns a JSON response indicating success or error.
