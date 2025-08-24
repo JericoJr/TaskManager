@@ -2,7 +2,7 @@ name: Send Email Reminders
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs every hour
+    - cron: '*/30 * * * *'  # Runs every 30 min
   workflow_dispatch:      # Allows manual triggering
 
 jobs:
