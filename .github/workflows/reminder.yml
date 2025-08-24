@@ -1,12 +1,12 @@
-name: Send Task Reminders
+name: Send Email Reminders
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs every hour at 00 minutes
-  workflow_dispatch:      # Allows manual trigger from GitHub Actions tab
+    - cron: '0 * * * *'  # Runs every hour
+  workflow_dispatch:      # Allows manual triggering
 
 jobs:
-  send_reminder_emails:
+  run-reminder-script:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,10 +23,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run reminder script
+      - name: Run reminders script
         env:
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-        run: |
-          python reminders.py
+        run: python reminders.py

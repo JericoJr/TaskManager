@@ -1,11 +1,18 @@
-from flask_mail import Message                         # Import Message class to construct emails
+from flask_mail import Message, Mail                   # Import Email Support
 from datetime import datetime, timedelta, timezone     # Import date/time utilities
 from app import db, app, mail, Task, User               # Import app components and database models
-import time
-from flask import jsonify
 from flask_apscheduler import APScheduler               # Import scheduler for periodic jobs
+import os
 
-scheduler = APScheduler()                               # Create a scheduler instance
+# Email config (for GitHub Actions environment)
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')  # Set in GitHub Actions
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')  # Set in GitHub Actions
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
+
+mail = Mail(app)
 
 # Create a 24-hour reminder email notification for users' task
 def task_reminders():
@@ -42,32 +49,6 @@ def task_reminders():
                 # Send the email via Flask-Mail
                 mail.send(msg)
 
-def start_scheduler():
-    scheduler.init_app(app)                                # Initialize scheduler with Flask app context
-    scheduler.start()                                      # Start the scheduler running
-    # Schedule task_reminders to run every hour by interval trigger
-    scheduler.add_job(func=task_reminders, trigger='interval', id='send_reminders', hours=1)
 
-
-# Define a route /send_reminders that accepts GET requests; This route is Triggered automatically because GitHub Actions, which is run every hour, sends Get Request to that Flask Route
-@app.route('/send_reminders', methods=['GET'])
-def send_reminders():
-    # Returns a JSON response indicating success or error.
-    try:
-        # Call your existing function to check tasks and send reminder emails
-        task_reminders()
-        
-        # If successful, return a JSON response with status and message
-        return jsonify({"status": "success", "message": "Reminders sent"}), 200
-    
-    except Exception as e:
-        # If any error occurs, catch it and return JSON with error info
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-
-
-# Run this block only if this script is executed directly (not imported)
 if __name__ == "__main__":
-    with app.app_context():
-        task_reminders()                                   # Run reminders once immediately (for testing)
-    start_scheduler()                                      # Then start the periodic scheduler
+    task_reminders()                                 
