@@ -17,9 +17,9 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
 mail = Mail(app)
 
 # Create a 24-hour reminder email notification for users' task
-def task_reminders_tommorow():
+def task_reminders_tomorow():
     with app.app_context():  # Create application context to access DB and Flask extensions
-        now = datetime.now(timezone.utc)  # Returns timezone-aware UTC datetime
+        now = datetime.now()  # Returns timezone-aware UTC datetime
         
         # Define a small window around 24 hours from now
         # This allows catching tasks with deadline about 24 hours away
@@ -46,7 +46,7 @@ def task_reminders_tommorow():
                 msg = Message(
                     subject=f"⏰ Task Reminder: {task.title}",
                     recipients=[user.email],  # Send to user's email
-                    body=f"Your task '{task.title}' is due tommorow {task.deadline.strftime('%B %d %Y @ %I:%M %p')}."
+                    body=f"Your task '{task.title}' is due tomorow {task.deadline.strftime('%B %d %Y @ %I:%M %p')}."
                 )
                 print(f"Sending email to {user.email} for task {task.title}")
                 # Send the email via Flask-Mail
@@ -67,16 +67,15 @@ def task_reminder_today():
             user_id = task.user_id # Get the user_id associated with the task
             user = User.query.get(user_id) # Get User from User Database using their ID
             email = user.email
-            if user and email:
-                msg = Message(
-                    subject=f"⏰ Task Reminder: {task.title}",
-                    recipients=[email],  # Send to user's email
-                    body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
-                )
-                # Send the email via Flask-Mail
-                mail.send(msg)
+            msg = Message(
+                subject=f"⏰ Task Reminder: {task.title}",
+                recipients=[email],  # Send to user's email
+                body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
+            )
+            # Send the email via Flask-Mail
+            mail.send(msg)
                 
 
 if __name__ == "__main__":
-    task_reminders_tommorow()     
+    task_reminders_tomorow()     
     task_reminder_today()                            
