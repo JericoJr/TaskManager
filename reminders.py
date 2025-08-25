@@ -46,7 +46,7 @@ def task_reminders_tommorow():
                 msg = Message(
                     subject=f"⏰ Task Reminder: {task.title}",
                     recipients=[user.email],  # Send to user's email
-                    body=f"Your task '{task.title}' is due on {task.deadline.strftime('%B %d %Y @ %I:%M %p')}."
+                    body=f"Your task '{task.title}' is due tommorow {task.deadline.strftime('%B %d %Y @ %I:%M %p')}."
                 )
                 print(f"Sending email to {user.email} for task {task.title}")
                 # Send the email via Flask-Mail
@@ -73,13 +73,9 @@ def task_reminder_today():
                     recipients=[email],  # Send to user's email
                     body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
                 )
-                print(f"Sending email to {email} for task {task.title}")
                 # Send the email via Flask-Mail
                 mail.send(msg)
                 
-
-
-
 
 if __name__ == "__main__":
     task_reminders_tommorow()     
