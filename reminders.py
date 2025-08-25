@@ -21,20 +21,18 @@ def task_reminders_tomorrow():
     with app.app_context():  # Create application context to access DB and Flask extensions
         now = datetime.now()  
         
-        tomorrow = (now + timedelta(days=1)).date() # Adds current day by 1 day to get tomorrow's date
+        tomorrow = (now + timedelta(days=1)) # Adds current day by 1 day to get tomorrow's date
 
         # # Gives an 1 hour window to check task's time. exa. task due @ 3pm tomorrow, checks for task between 3pm - 4pm
       # Get current hour
-        current_hour = tomorrow.hour()
 
         # Build 1-hour window for tomorrow at the same hour as now
-        window_start = datetime.combine(tomorrow, time(current_hour, 0))
-        window_end = window_start + timedelta(hours=1)
+        tomorrow_end = tomorrow + timedelta(hours=1)
 
         tasks = Task.query.filter(
             Task.status == 'In-Progress',
-            Task.deadline >= window_start,
-            Task.deadline <= window_end,
+            Task.deadline >= tomorrow,
+            Task.deadline <= tomorrow_end,
             Task.set_tomorrow_reminder == True
         ).all()
 
