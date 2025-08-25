@@ -24,8 +24,8 @@ def task_reminders_tomorrow():
         # tomorrow = date.today() + timedelta(days=1) # Adds current day by 1 day to get tomorrow's date
 
         # Gives an 1 hour window to check task's time. exa. task due @ 3pm tomorrow, checks for task between 3pm - 4pm
-        window_start = now + timedelta(days=1)
-        window_end = now + timedelta(days=1, hours=1)
+        window_start = now + timedelta(hours=23, minutes=30)
+        window_end = now + timedelta(hours=24, minutes=30)
 
         # Query tasks:
         # - Status is 'In-Progress' (not completed)
@@ -48,7 +48,7 @@ def task_reminders_tomorrow():
                 task.set_tomorrow_reminder = False # Set to False to indicate the email reminder for tomorrow has been sent once
                 # Prepare the reminder email message
                 msg = Message(
-                    subject=f"⏰ Task Reminder: {task.title}",
+                    subject=f"⏰ Task Reminder: {task.title} Due Tomorrow",
                     recipients=[user.email],  # Send to user's email
                     body=f"Your task '{task.title}' is due tomorow {task.deadline.strftime('%B %d %Y @ %I:%M %p')}."
                     f"Description: {task.description}"
