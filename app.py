@@ -71,9 +71,13 @@ class User(db.Model):
 
     # User's email, must be unique and cannot be null
     email = db.Column(db.String(120), unique=True, nullable=False)
+
+    # Stores email notifications, holds true or false, true is default
+    email_notifications = db.Column(db.Boolean, nullable=False, default=True)
     
     # Stores hashed password (never store plaintext passwords!)
     password_hash = db.Column(db.String(128))
+
 
     # Method to set password: converts plain password to a secure hash
     def set_password(self, password):
@@ -144,6 +148,9 @@ def signup():
         # Also assign first, and last names to User model properties
         new_user.first = first
         new_user.last = last
+
+        # Sets default email notfications as true 
+        new_user.email_notifications = True
 
         # Add the new user to the database session and commit(save) changes
         db.session.add(new_user)
@@ -754,7 +761,7 @@ def change_password():
 @app.route('/delete_account', methods=['POST'])
 def delete_account():
     # Gets user id
-    user_id = session['user_id']
+    user_id = session.get('user_id')
 
     # Finds user in database
     user = User.query.get(user_id)
@@ -772,13 +779,15 @@ def delete_account():
 @app.route('/notifications', methods=['POST']) 
 def notifications():
     result = request.form['result']
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
 
     if result == 'yes':
-        session['notifications'] = False
+        user.email_notifications = False
         #WORK IN PROGRESS - needs code to turn email notifications off when tasks portion is complete
         flash('Email Notifications turned off (IP)', 'error')
     else:
-        session['notifications'] = True
+        user.email_notifications = True
         flash('Email Notifications turned on (IP)', 'success')
     return redirect(url_for('settings'))
 

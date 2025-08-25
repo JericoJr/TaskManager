@@ -40,8 +40,7 @@ def task_reminders_tomorow():
             # Fetch the user who owns the task
             user = User.query.get(task.user_id)
 
-            # Check if user exists and has an email
-            if user and user.email:
+            if user.email_notifications: # Checks if user set email notifications to on
                 # Prepare the reminder email message
                 msg = Message(
                     subject=f"⏰ Task Reminder: {task.title}",
@@ -66,14 +65,16 @@ def task_reminder_today():
         for task in today_tasks:
             user_id = task.user_id # Get the user_id associated with the task
             user = User.query.get(user_id) # Get User from User Database using their ID
-            email = user.email
-            msg = Message(
-                subject=f"⏰ Task Reminder: {task.title}",
-                recipients=[email],  # Send to user's email
-                body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
-            )
-            # Send the email via Flask-Mail
-            mail.send(msg)
+
+            if user.email_notifications: # Checks if user set email notifications to on
+                email = user.email
+                msg = Message(
+                    subject=f"⏰ Task Reminder: {task.title}",
+                    recipients=[email],  # Send to user's email
+                    body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
+                )
+                # Send the email via Flask-Mail
+                mail.send(msg)
                 
 
 if __name__ == "__main__":
