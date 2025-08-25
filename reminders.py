@@ -23,9 +23,9 @@ def task_reminders_tomorrow():
         
         # tomorrow = date.today() + timedelta(days=1) # Adds current day by 1 day to get tomorrow's date
 
-        # Gives an 1 hour window to check task's time. exa. task due @ 3pm, checks for task between 2pm - 3pm
-        window_start = now + timedelta(hours=23, minutes=30)
-        window_end = now + timedelta(hours=24, minutes=30)
+        # Gives an 1 hour window to check task's time. exa. task due @ 3pm tomorrow, checks for task between 3pm - 4pm
+        window_start = now + timedelta(days=1)
+        window_end = now + timedelta(days=1, hours=1)
 
         # Query tasks:
         # - Status is 'In-Progress' (not completed)
@@ -50,7 +50,8 @@ def task_reminders_tomorrow():
                 msg = Message(
                     subject=f"⏰ Task Reminder: {task.title}",
                     recipients=[user.email],  # Send to user's email
-                    body=f"Your task '{task.title}' is due tomorow {task.deadline.strftime('%B %d %Y @ %I:%M %p')}. Description: {task.description}"
+                    body=f"Your task '{task.title}' is due tomorow {task.deadline.strftime('%B %d %Y @ %I:%M %p')}."
+                    f"Description: {task.description}"
                 )
                 print(f"Sending email to {user.email} for task {task.title}")
                 # Send the email via Flask-Mail
@@ -78,7 +79,8 @@ def task_reminder_today():
                 msg = Message(
                     subject=f"⏰ Task Reminder: {task.title} Due Today",
                     recipients=[email],  # Send to user's email
-                    body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}. Description: {task.description}" 
+                    body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
+                    f"Description: {task.description}" 
                 )
                 # Send the email via Flask-Mail
                 mail.send(msg)
