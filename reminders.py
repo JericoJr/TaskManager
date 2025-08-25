@@ -23,29 +23,22 @@ def task_reminders_tomorrow():
         
         tomorrow = (now + timedelta(days=1)) # Adds current day by 1 day to get tomorrow's date
 
-        # # Gives an 1 hour window to check task's time. exa. task due @ 3pm tomorrow, checks for task between 3pm - 4pm
-      # Get current hour
-
-        # Build 1-hour window for tomorrow at the same hour as now
-        tomorrow_end = tomorrow + timedelta(hours=1)
-
         tasks = Task.query.filter(
             Task.status == 'In-Progress',
-            Task.deadline >= tomorrow,
-            Task.deadline <= tomorrow_end,
+            Task.deadline >= now,
+            Task.deadline <= tomorrow,
             Task.set_tomorrow_reminder == True
         ).all()
 
         # Loop through all matching tasks
         for task in tasks:
             print(f"Found task: {task.title} | Deadline: {task.deadline}")
+            time_until_deadline = task.deadline - now # Get leftover time
+
             # Fetch the user who owns the task
             user = User.query.get(task.user_id)
 
-            if user.email_notifications: # Checks if user set email notifications to on and that email reminder has not been set
-                task.set_tomorrow_reminder = False # Set to False to indicate the email reminder for tomorrow has been sent once
-                db.session.commit() # Saves any new changes to database
-
+            if user.email_notifications and (timedelta(hours=23) <= time_until_deadline <= timedelta(hours=24)): # Checks if user set email notifications to on and that email reminder has not been set
                 # Prepare the reminder email message
                 msg = Message(
                     subject=f"⏰ Task Reminder: {task.title} Due Tomorrow",
