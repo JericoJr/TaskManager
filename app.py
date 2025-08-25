@@ -37,9 +37,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.environ.get('task25manager@gmail.com')      # Replace with website email (this will be the sender)
-app.config['MAIL_PASSWORD'] = os.environ.get('ovgz njcd rrid wlqb')    # Use an App Password (not your real Gmail password)
-app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('task25manager@gmail.com')
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')      # Replace with website email (this will be the sender)
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')    # Use an App Password (not your real Gmail password)
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
 
 # Scheduler config
 app.config['SCHEDULER_API_ENABLED'] = True
