@@ -29,7 +29,7 @@ def task_reminders_tomorrow():
         # # End of reminder window, 1 hour after window_start (e.g., 4:00 PM tomorrow)
         # window_end = window_start + timedelta(hours=1)
 
-        start_hour = now.hour
+        start_hour = tomorrow.hour
         end_hour = start_hour + 1
 
         # Query tasks:
