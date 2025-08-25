@@ -106,9 +106,9 @@ class Task(db.Model):
     # Stores status of task like complete and in-progress where in-progess is default.
     status = db.Column(db.String(50), nullable=False, default='In-Progress')
 
-    # Stores reminder of task, if email notifications are on set today and tommorow reminders to True as default
+    # Stores reminder of task, if email notifications are on set today and tomorrow reminders to True as default
     set_today_reminder = db.Column(db.Boolean, nullable=False, default=True)
-    set_tommorow_reminder = db.Column(db.Boolean, nullable=False, default=True)
+    set_tomorrow_reminder = db.Column(db.Boolean, nullable=False, default=True)
 
     # This line creates a column in the Task table called 'user_id'.
     # It stores an INTEGER that represents the ID of the user who owns this task.
@@ -575,7 +575,7 @@ def add_task():
 
     # Set email reminders for task to true by default, only works if user turns on email notifications
     new_task.set_today_reminder = True
-    new_task.set_tommorow_reminder = True
+    new_task.set_tomorrow_reminder = True
 
     user_id = session['user_id'] # Grab the current logged-in user's ID from the session
 

@@ -17,22 +17,26 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
 mail = Mail(app)
 
 # Create a 24-hour reminder email notification for users' task
-def task_reminders_tomorow():
+def task_reminders_tomorrow():
     with app.app_context():  # Create application context to access DB and Flask extensions
         now = datetime.now()  # Returns timezone-aware UTC datetime
         
-        # Define a small window around 24 hours from now
-        # This allows catching tasks with deadline about 24 hours away
-        reminder_window_start = now + timedelta(hours=23, minutes=59)
-        reminder_window_end = now + timedelta(hours=24, minutes=1)
+        # tomorrow = date.today() + timedelta(days=1) # Adds current day by 1 day to get tomorrow's date
+
+        # Gives an 1 hour window to check task's time. exa. task due @ 3pm, checks for task between 2pm - 3pm
+        window_start = now + timedelta(hours=23, minutes=30)
+        window_end = now + timedelta(hours=24, minutes=30)
 
         # Query tasks:
         # - Status is 'In-Progress' (not completed)
         # - Deadline falls within the reminder window (approx 24 hours from now)
         tasks = Task.query.filter(
             Task.status == 'In-Progress',
-            Task.deadline >= reminder_window_start,
-            Task.deadline <= reminder_window_end
+            #extract('year', Task.deadline) == tomorrow.year,
+            #extract('month', Task.deadline) == tomorrow.month,
+            #extract('day', Task.deadline) == tomorrow.day,
+            Task.deadline >= window_start,
+            Task.deadline <= window_end
         ).all()
 
         # Loop through all matching tasks
@@ -40,17 +44,18 @@ def task_reminders_tomorow():
             # Fetch the user who owns the task
             user = User.query.get(task.user_id)
 
-            if user.email_notifications and task.set_tommorow_reminder: # Checks if user set email notifications to on and that email reminder has not been set
-                task.set_tommorow_reminder = False # Set to False to indicate the email reminder for tomorrow has been sent once
+            if user.email_notifications and task.set_tomorrow_reminder: # Checks if user set email notifications to on and that email reminder has not been set
+                task.set_tomorrow_reminder = False # Set to False to indicate the email reminder for tomorrow has been sent once
                 # Prepare the reminder email message
                 msg = Message(
                     subject=f"⏰ Task Reminder: {task.title}",
                     recipients=[user.email],  # Send to user's email
-                    body=f"Your task '{task.title}' is due tomorow {task.deadline.strftime('%B %d %Y @ %I:%M %p')}."
+                    body=f"Your task '{task.title}' is due tomorow {task.deadline.strftime('%B %d %Y @ %I:%M %p')}. Description: {task.description}"
                 )
                 print(f"Sending email to {user.email} for task {task.title}")
                 # Send the email via Flask-Mail
                 mail.send(msg)
+                db.session.commit() # Saves any new changes to database
 
 def task_reminder_today():
     with app.app_context():  # Create application context to access DB and Flask extensions
@@ -71,14 +76,16 @@ def task_reminder_today():
                 task.set_today_reminder = False
                 email = user.email # Gets user's email from User Database
                 msg = Message(
-                    subject=f"⏰ Task Reminder: {task.title}",
+                    subject=f"⏰ Task Reminder: {task.title} Due Today",
                     recipients=[email],  # Send to user's email
-                    body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
+                    body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}. Description: {task.description}" 
                 )
                 # Send the email via Flask-Mail
                 mail.send(msg)
+                db.session.commit() # Saves any new changes to database
+
                 
 
 if __name__ == "__main__":
-    task_reminders_tomorow()     
+    task_reminders_tomorrow()     
     task_reminder_today()                            
