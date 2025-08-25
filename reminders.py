@@ -1,5 +1,5 @@
 from flask_mail import Message, Mail                   # Import Email Support
-from datetime import datetime, timedelta, timezone, date     # Import date/time utilities
+from datetime import datetime, timedelta, timezone, date, time     # Import date/time utilities
 from app import db, app, mail, Task, User               # Import app components and database models
 from flask_apscheduler import APScheduler               # Import scheduler for periodic jobs
 from sqlalchemy import extract, func, case
@@ -21,7 +21,7 @@ def task_reminders_tomorrow():
     with app.app_context():  # Create application context to access DB and Flask extensions
         now = datetime.now()  
         
-        tomorrow = now + timedelta(days=1) # Adds current day by 1 day to get tomorrow's date
+        tomorrow = (now + timedelta(days=1)).date() # Adds current day by 1 day to get tomorrow's date
 
         # # Gives an 1 hour window to check task's time. exa. task due @ 3pm tomorrow, checks for task between 3pm - 4pm
         # # Start of reminder window (e.g., 3:00 PM tomorrow)
@@ -29,21 +29,20 @@ def task_reminders_tomorrow():
         # # End of reminder window, 1 hour after window_start (e.g., 4:00 PM tomorrow)
         # window_end = window_start + timedelta(hours=1)
 
-        start_hour = tomorrow.hour
+        start_hour = now.hour
         end_hour = start_hour + 1
 
         # Query tasks:
         # - Status is 'In-Progress' (not completed)
         # - Deadline falls within the reminder window (approx 24 hours from now)
+            # Build datetime objects for the window on tomorrow's date
+        window_start = datetime.combine(tomorrow, time(start_hour, 0))  # 2025-08-26 17:00:00
+        window_end = datetime.combine(tomorrow, time(end_hour, 0))      # 2025-08-26 18:00:00
+
         tasks = Task.query.filter(
             Task.status == 'In-Progress',
-            extract('year', Task.deadline) == tomorrow.year,
-            extract('month', Task.deadline) == tomorrow.month,
-            extract('day', Task.deadline) == tomorrow.day,
-            extract('hour', Task.deadline) >= start_hour,
-            extract('hour', Task.deadline) < end_hour,
-            # Task.deadline >= window_start,
-            # Task.deadline <= window_end,
+            Task.deadline >= window_start,
+            Task.deadline < window_end,
             Task.set_tomorrow_reminder == True
         ).all()
 
