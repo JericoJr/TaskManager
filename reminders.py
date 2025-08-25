@@ -29,20 +29,16 @@ def task_reminders_tomorrow():
         # # End of reminder window, 1 hour after window_start (e.g., 4:00 PM tomorrow)
         # window_end = window_start + timedelta(hours=1)
 
-        start_hour = now.hour
-        end_hour = start_hour + 1
 
-        # Query tasks:
-        # - Status is 'In-Progress' (not completed)
-        # - Deadline falls within the reminder window (approx 24 hours from now)
-            # Build datetime objects for the window on tomorrow's date
-        window_start = datetime.combine(tomorrow, time(start_hour, 0))  # 2025-08-26 17:00:00
-        window_end = datetime.combine(tomorrow, time(end_hour, 0))      # 2025-08-26 18:00:00
+        # Start of tomorrow (00:00:00)
+        window_start = datetime.combine(tomorrow, time.min)
+        # End of tomorrow (23:59:59.999999)
+        window_end = datetime.combine(tomorrow, time.max)
 
         tasks = Task.query.filter(
             Task.status == 'In-Progress',
             Task.deadline >= window_start,
-            Task.deadline < window_end,
+            Task.deadline <= window_end,
             Task.set_tomorrow_reminder == True
         ).all()
 
