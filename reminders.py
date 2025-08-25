@@ -94,7 +94,7 @@ def task_reminder_today():
 
                 # 3rd Reminder
                 time_left = task.deadline - now
-                if (timedelta(minutes=0) < time_left <= timedelta(hours=1)): # Checks if current time is 1 hour before or less than task's deadline
+                if (timedelta(minutes=0) < time_left <= timedelta(minutes=60)): # Checks if current time is 1 hour before or less than task's deadline
                     msg = Message(
                         subject=f"⏰ Task Reminder: {task.title} Due Soon",
                         recipients=[email],  # Send to user's email
