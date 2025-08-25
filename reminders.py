@@ -67,7 +67,7 @@ def task_reminder_today():
             extract('year', Task.deadline) == today.year,
             extract('month', Task.deadline) == today.month,
             extract('day', Task.deadline) == today.day,
-            task.set_today_reminder == True
+            Task.set_today_reminder == True
         ).all()
 
         # Loops through all tasks that are due today, and sends email to users' email according to their id
