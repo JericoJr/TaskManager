@@ -796,6 +796,8 @@ def notifications():
     else:
         user.email_notifications = True
         flash('Email Notifications turned on (IP)', 'success')
+
+    db.session.commit()
     return redirect(url_for('settings'))
 
 # Define a route for '/delete_data
