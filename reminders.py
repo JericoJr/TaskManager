@@ -23,22 +23,22 @@ def task_reminders_tomorrow():
         
         tomorrow = now + timedelta(days=1) # Adds current day by 1 day to get tomorrow's date
 
-        # Gives an 1 hour window to check task's time. exa. task due @ 3pm tomorrow, checks for task between 3pm - 4pm
-        # Start of reminder window (e.g., 3:00 PM tomorrow)
-        window_start = tomorrow.replace(second=0, microsecond=0)
-        # End of reminder window, 1 hour after window_start (e.g., 4:00 PM tomorrow)
-        window_end = window_start + timedelta(hours=1)
+        # # Gives an 1 hour window to check task's time. exa. task due @ 3pm tomorrow, checks for task between 3pm - 4pm
+        # # Start of reminder window (e.g., 3:00 PM tomorrow)
+        # window_start = tomorrow.replace(second=0, microsecond=0)
+        # # End of reminder window, 1 hour after window_start (e.g., 4:00 PM tomorrow)
+        # window_end = window_start + timedelta(hours=1)
 
         # Query tasks:
         # - Status is 'In-Progress' (not completed)
         # - Deadline falls within the reminder window (approx 24 hours from now)
         tasks = Task.query.filter(
             Task.status == 'In-Progress',
-            #extract('year', Task.deadline) == tomorrow.year,
-            #extract('month', Task.deadline) == tomorrow.month,
-            #extract('day', Task.deadline) == tomorrow.day,
-            Task.deadline >= window_start,
-            Task.deadline <= window_end,
+            extract('year', Task.deadline) == tomorrow.year,
+            extract('month', Task.deadline) == tomorrow.month,
+            extract('day', Task.deadline) == tomorrow.day,
+            # Task.deadline >= window_start,
+            # Task.deadline <= window_end,
             Task.set_tomorrow_reminder == True
         ).all()
 
