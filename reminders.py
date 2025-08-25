@@ -36,7 +36,8 @@ def task_reminders_tomorrow():
             #extract('month', Task.deadline) == tomorrow.month,
             #extract('day', Task.deadline) == tomorrow.day,
             Task.deadline >= window_start,
-            Task.deadline <= window_end
+            Task.deadline <= window_end,
+            Task.set_tomorrow_reminder == True
         ).all()
 
         # Loop through all matching tasks
@@ -44,7 +45,7 @@ def task_reminders_tomorrow():
             # Fetch the user who owns the task
             user = User.query.get(task.user_id)
 
-            if user.email_notifications and task.set_tomorrow_reminder: # Checks if user set email notifications to on and that email reminder has not been set
+            if user.email_notifications: # Checks if user set email notifications to on and that email reminder has not been set
                 task.set_tomorrow_reminder = False # Set to False to indicate the email reminder for tomorrow has been sent once
                 # Prepare the reminder email message
                 msg = Message(
@@ -65,7 +66,8 @@ def task_reminder_today():
             Task.status == 'In-Progress',
             extract('year', Task.deadline) == today.year,
             extract('month', Task.deadline) == today.month,
-            extract('day', Task.deadline) == today.day
+            extract('day', Task.deadline) == today.day,
+            task.set_today_reminder == True
         ).all()
 
         # Loops through all tasks that are due today, and sends email to users' email according to their id
@@ -73,7 +75,7 @@ def task_reminder_today():
             user_id = task.user_id # Get the user_id associated with the task
             user = User.query.get(user_id) # Get User from User Database using their ID
 
-            if user.email_notifications and task.set_today_reminder: # Checks if user set email notifications to on and that email has not already been sent
+            if user.email_notifications # Checks if user set email notifications to on and that email has not already been sent
                 task.set_today_reminder = False
                 email = user.email # Gets user's email from User Database
                 msg = Message(
