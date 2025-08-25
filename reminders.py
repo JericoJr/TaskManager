@@ -38,7 +38,7 @@ def task_reminders_tomorrow():
             # Fetch the user who owns the task
             user = User.query.get(task.user_id)
 
-            if user.email_notifications and (timedelta(hours=23) <= time_until_deadline <= timedelta(hours=24)): # Checks if user set email notifications to on and that email reminder has not been set
+            if user.email_notifications and (timedelta(hours=22) <= time_until_deadline <= timedelta(hours=24)): # Checks if user set email notifications to on and that email reminder has not been set
                 # Prepare the reminder email message
                 msg = Message(
                     subject=f"⏰ Task Reminder: {task.title} Due Tomorrow",
