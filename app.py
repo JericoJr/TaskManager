@@ -31,16 +31,19 @@ os.makedirs(app.instance_path, exist_ok=True)
 # Secret key is needed to keep client sessions secure
 app.secret_key = os.environ.get('SECRET_KEY') # 'SECRET_KEY' is the name of the environment variable you want to read, the next parameter is the actual secret key value
 
-# Get the absolute path of the directory where the current file (e.g., app.py) is located.
-# This ensures that file paths are consistent regardless of where the script is run from. Can run in both app.py and reminders.py
+# Get the absolute path of the directory where the current file is located (e.g., app.py or reminders.py)
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# Create the full absolute path to the SQLite database file named 'taskmanager.db'
-# This places the database in the same directory as the script, ensuring consistency.
-db_path = os.path.join(basedir, 'taskmanager.db')
+# Define the full path to the 'instance' folder within the project
+instance_path = os.path.join(basedir, 'instance')
 
-# Configure SQLAlchemy to use SQLite with the constructed absolute file path.
-# The URI format 'sqlite:///<absolute_path>' tells SQLAlchemy where to find (or create) the database file.
+# Ensure the instance folder exists (create it if not)
+os.makedirs(instance_path, exist_ok=True)
+
+# Build the full path to the SQLite database file inside the instance folder
+db_path = os.path.join(instance_path, 'taskmanager.db')
+
+# Configure SQLAlchemy to use SQLite with the absolute path to the database file
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 
 
