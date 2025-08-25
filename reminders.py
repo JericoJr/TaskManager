@@ -41,7 +41,7 @@ def task_reminders_tomorrow():
             extract('month', Task.deadline) == tomorrow.month,
             extract('day', Task.deadline) == tomorrow.day,
             extract('hour', Task.deadline) >= start_hour,
-            extract('hour', Task.deadline) <= end_hour,
+            extract('hour', Task.deadline) < end_hour,
             # Task.deadline >= window_start,
             # Task.deadline <= window_end,
             Task.set_tomorrow_reminder == True
