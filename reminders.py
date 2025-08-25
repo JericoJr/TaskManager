@@ -25,9 +25,9 @@ def task_reminders_tomorrow():
 
         # # Gives an 1 hour window to check task's time. exa. task due @ 3pm tomorrow, checks for task between 3pm - 4pm
         # Start of tomorrow and its time, exa. 3pm 
-        window_start = datetime.combine(tomorrow, time(now.hour, 0)) # combines tomorrow date with the current hour and 0 minutes
+        window_start = datetime.combine(tomorrow, time.min)
         # End of 1st hour after window start, exa. 4pm,
-        window_end = window_start + timedelta(hours=1)
+        window_end = datetime.combine(tomorrow, time.max) 
 
         tasks = Task.query.filter(
             Task.status == 'In-Progress',
