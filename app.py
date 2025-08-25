@@ -20,6 +20,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # Import email notifications
 from flask_mail import Mail, Message
 
+from dotenv import load_dotenv
+
 
 # Create Flask app and set instance_relative_config to True so we can use the instance folder
 app = Flask(__name__, instance_relative_config=True)
@@ -27,11 +29,13 @@ app = Flask(__name__, instance_relative_config=True)
 os.makedirs(app.instance_path, exist_ok=True)
 
 # Secret key is needed to keep client sessions secure
-app.secret_key = os.environ.get('SECRET_KEY', 'e9b1a42c7f3d8e59b6f2041a8d72c5e1') # 'SECRET_KEY' is the name of the environment variable you want to read, the next parameter is the actual secret key value
+app.secret_key = os.environ.get('SECRET_KEY') # 'SECRET_KEY' is the name of the environment variable you want to read, the next parameter is the actual secret key value
 
 # Configure a single consistent SQLite database path
 db_path = os.path.join(app.instance_path, 'taskmanager.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+
+load_dotenv()  # This loads the .env file and sets environment variables
 
 # Email configuration (for example, using Gmail)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -40,6 +44,9 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')      # Replace with website email (this will be the sender)
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')    # Use an App Password (not your real Gmail password)
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
+
+print("MAIL_USERNAME:", os.environ.get('MAIL_USERNAME'))
+print("MAIL_PASSWORD:", os.environ.get('MAIL_PASSWORD'))
 
 # Scheduler config
 app.config['SCHEDULER_API_ENABLED'] = True
