@@ -19,7 +19,7 @@ mail = Mail(app)
 # Create a 24-hour reminder email notification for users' task
 def task_reminders_tomorrow():
     with app.app_context():  # Create application context to access DB and Flask extensions
-        now = datetime.now()  
+        now = datetime.utcnow()  
         
         tomorrow = (now + timedelta(days=1)) # Adds current day by 1 day to get tomorrow's date
 
@@ -52,7 +52,7 @@ def task_reminders_tomorrow():
 
 def task_reminder_today():
     with app.app_context():  # Create application context to access DB and Flask extensions
-        today = date.today() # format MM/DD/YYYY
+        today = datetime.utcnow().date()
         today_tasks = Task.query.filter( # Gets a list of all tasks that are not completed and due today
             Task.status == 'In-Progress',
             extract('year', Task.deadline) == today.year,
@@ -66,7 +66,7 @@ def task_reminder_today():
             user = User.query.get(user_id) # Get User from User Database using their ID
 
             if user.email_notifications: # Checks if user set email notifications to on and that email has not already been sent
-                now = datetime.now()
+                now = datetime.utcnow()
                 curr_time = now.time() # Gets current time as time object
                 email = user.email # Gets user's email from User Database
                 # 1st Reminder
