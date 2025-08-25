@@ -57,7 +57,8 @@ def task_reminders_tomorrow():
                 print(f"Sending email to {user.email} for task {task.title}")
                 # Send the email via Flask-Mail
                 mail.send(msg)
-                db.session.commit() # Saves any new changes to database
+        
+        db.session.commit() # Saves any new changes to database
 
 def task_reminder_today():
     with app.app_context():  # Create application context to access DB and Flask extensions
@@ -86,7 +87,7 @@ def task_reminder_today():
                 )
                 # Send the email via Flask-Mail
                 mail.send(msg)
-                db.session.commit() # Saves any new changes to database
+        db.session.commit() # Saves any new changes to database
 
                 
 
