@@ -143,7 +143,7 @@ def signup():
         db.session.commit()
 
         # Send a Welcome email to User
-        msg = Message("Welcome to Task Manager", recipients=[email])
+        msg = Message("Welcome to Task Manager", recipients=[email], sender=app.config['MAIL_DEFAULT_SENDER'])
         msg.body = f"Thank you {first}, for signing up and using our app!" #format string represented by f"", where the content in {} is the placeholder
         mail.send(msg)
 
@@ -165,7 +165,7 @@ def generate_code():
         session['target_code'] = targetCode # Temporarily stores target code within session
 
         # Send a forgot email to User with random generated 4 digit-code
-        msg = Message("Task Manager - Forgot Password:", recipients=[email])
+        msg = Message("Task Manager - Forgot Password:", recipients=[email], sender=app.config['MAIL_DEFAULT_SENDER'])
         msg.body = f"Here is your code: {targetCode}" #format string represented by f"", where the content in {} is the placeholder
         mail.send(msg)
         flash('Code sent to email, check your inbox', 'success')
