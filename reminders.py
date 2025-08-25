@@ -59,22 +59,23 @@ def task_reminder_today():
             Task.status == 'In-Progress',
             extract('year', Task.deadline) == today.year,
             extract('month', Task.deadline) == today.month,
-            extract('day', Task.deadline) == today
+            extract('day', Task.deadline) == today.day
         ).all()
 
         for task in today_tasks:
             user_id = task.user_id # Get the user_id associated with the task
             user = User.query.get(user_id) # Get User from User Database using their ID
             email = user.email
-            msg = Message(
-                subject=f"⏰ Task Reminder: {task.title}",
-                recipients=[email],  # Send to user's email
-                body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
-            )
-            print(f"Sending email to {email} for task {task.title}")
-            # Send the email via Flask-Mail
-            mail.send(msg)
-            
+            if user and email:
+                msg = Message(
+                    subject=f"⏰ Task Reminder: {task.title}",
+                    recipients=[email],  # Send to user's email
+                    body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
+                )
+                print(f"Sending email to {email} for task {task.title}")
+                # Send the email via Flask-Mail
+                mail.send(msg)
+                
 
 
 
