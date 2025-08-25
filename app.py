@@ -31,9 +31,18 @@ os.makedirs(app.instance_path, exist_ok=True)
 # Secret key is needed to keep client sessions secure
 app.secret_key = os.environ.get('SECRET_KEY') # 'SECRET_KEY' is the name of the environment variable you want to read, the next parameter is the actual secret key value
 
-# Configure a single consistent SQLite database path
-db_path = os.path.join(app.instance_path, 'taskmanager.db')
+# Get the absolute path of the directory where the current file (e.g., app.py) is located.
+# This ensures that file paths are consistent regardless of where the script is run from. Can run in both app.py and reminders.py
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+# Create the full absolute path to the SQLite database file named 'taskmanager.db'
+# This places the database in the same directory as the script, ensuring consistency.
+db_path = os.path.join(basedir, 'taskmanager.db')
+
+# Configure SQLAlchemy to use SQLite with the constructed absolute file path.
+# The URI format 'sqlite:///<absolute_path>' tells SQLAlchemy where to find (or create) the database file.
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+
 
 load_dotenv()  # This loads the .env file and sets environment variables
 
