@@ -25,7 +25,7 @@ def task_reminders_tomorrow():
 
         # # Gives an 1 hour window to check task's time. exa. task due @ 3pm tomorrow, checks for task between 3pm - 4pm
       # Get current hour
-        current_hour = now.hour
+        current_hour = tomorrow.hour
 
         # Build 1-hour window for tomorrow at the same hour as now
         window_start = datetime.combine(tomorrow, time(current_hour, 0))
@@ -40,6 +40,7 @@ def task_reminders_tomorrow():
 
         # Loop through all matching tasks
         for task in tasks:
+            print(f"Found task: {task.title} | Deadline: {task.deadline}")
             # Fetch the user who owns the task
             user = User.query.get(task.user_id)
 
