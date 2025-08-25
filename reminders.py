@@ -46,6 +46,7 @@ def task_reminders():
                     recipients=[user.email],  # Send to user's email
                     body=f"Your task '{task.title}' is due on {task.deadline.strftime('%B %d %Y @ %I:%M %p')}."
                 )
+                print(f"Sending email to {user.email} for task {task.title}")
                 # Send the email via Flask-Mail
                 mail.send(msg)
 
