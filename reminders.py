@@ -47,7 +47,8 @@ def task_reminders_tomorrow():
 
             if user.email_notifications: # Checks if user set email notifications to on and that email reminder has not been set
                 task.set_tomorrow_reminder = False # Set to False to indicate the email reminder for tomorrow has been sent once
-                db.session.add(task)
+                db.session.commit() # Saves any new changes to database
+
                 # Prepare the reminder email message
                 msg = Message(
                     subject=f"⏰ Task Reminder: {task.title} Due Tomorrow",
@@ -59,7 +60,6 @@ def task_reminders_tomorrow():
                 # Send the email via Flask-Mail
                 mail.send(msg)
         
-        db.session.commit() # Saves any new changes to database
 
 def task_reminder_today():
     with app.app_context():  # Create application context to access DB and Flask extensions
@@ -79,7 +79,8 @@ def task_reminder_today():
 
             if user.email_notifications: # Checks if user set email notifications to on and that email has not already been sent
                 task.set_today_reminder = False
-                db.session.add(task)
+                db.session.commit() # Saves any new changes to database
+
                 email = user.email # Gets user's email from User Database
                 msg = Message(
                     subject=f"⏰ Task Reminder: {task.title} Due Today",
@@ -89,7 +90,6 @@ def task_reminder_today():
                 )
                 # Send the email via Flask-Mail
                 mail.send(msg)
-        db.session.commit() # Saves any new changes to database
 
                 
 
