@@ -45,8 +45,8 @@ app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')      # Replace wit
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')    # Use an App Password (not your real Gmail password)
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
 
-print("MAIL_USERNAME:", os.environ.get('MAIL_USERNAME'))
-print("MAIL_PASSWORD:", os.environ.get('MAIL_PASSWORD'))
+# print("MAIL_USERNAME:", os.environ.get('MAIL_USERNAME'))
+# print("MAIL_PASSWORD:", os.environ.get('MAIL_PASSWORD'))
 
 # Scheduler config
 app.config['SCHEDULER_API_ENABLED'] = True
@@ -78,7 +78,6 @@ class User(db.Model):
     # Stores hashed password (never store plaintext passwords!)
     password_hash = db.Column(db.String(128))
 
-
     # Method to set password: converts plain password to a secure hash
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -106,6 +105,10 @@ class Task(db.Model):
 
     # Stores status of task like complete and in-progress where in-progess is default.
     status = db.Column(db.String(50), nullable=False, default='In-Progress')
+
+    # Stores reminder of task, if email notifications are on set today and tommorow reminders to True as default
+    set_today_reminder = db.Column(db.Boolean, nullable=False, default=True)
+    set_tommorow_reminder = db.Column(db.Boolean, nullable=False, default=True)
 
     # This line creates a column in the Task table called 'user_id'.
     # It stores an INTEGER that represents the ID of the user who owns this task.
@@ -569,6 +572,10 @@ def add_task():
     new_task.priority = priority
     new_task.deadline = deadline
     new_task.status = 'In-Progress' # Set status as In-Progress as default
+
+    # Set email reminders for task to true by default, only works if user turns on email notifications
+    new_task.set_today_reminder = True
+    new_task.set_tommorow_reminder = True
 
     user_id = session['user_id'] # Grab the current logged-in user's ID from the session
 

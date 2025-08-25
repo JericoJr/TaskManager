@@ -40,7 +40,8 @@ def task_reminders_tomorow():
             # Fetch the user who owns the task
             user = User.query.get(task.user_id)
 
-            if user.email_notifications: # Checks if user set email notifications to on
+            if user.email_notifications and task.set_tommorow_reminder: # Checks if user set email notifications to on and that email reminder has not been set
+                task.set_tommorow_reminder = False # Set to False to indicate the email reminder for tomorrow has been sent once
                 # Prepare the reminder email message
                 msg = Message(
                     subject=f"⏰ Task Reminder: {task.title}",
@@ -66,8 +67,9 @@ def task_reminder_today():
             user_id = task.user_id # Get the user_id associated with the task
             user = User.query.get(user_id) # Get User from User Database using their ID
 
-            if user.email_notifications: # Checks if user set email notifications to on
-                email = user.email
+            if user.email_notifications and task.set_today_reminder: # Checks if user set email notifications to on and that email has not already been sent
+                task.set_today_reminder = False
+                email = user.email # Gets user's email from User Database
                 msg = Message(
                     subject=f"⏰ Task Reminder: {task.title}",
                     recipients=[email],  # Send to user's email
