@@ -104,6 +104,14 @@ def task_reminder_today():
                     # Send the email via Flask-Mail
                     mail.send(msg)
                 
+                print(f"Deadline: {task.deadline}, Type: {type(task.deadline)}")
+                print("Is task.deadline timezone aware?", task.deadline.tzinfo is not None and task.deadline.tzinfo.utcoffset(task.deadline) is not None)
+
+                now = datetime.now()
+                print(f"Now: {now}, Type: {type(now)}")
+                print("Is datetime.now() timezone aware?", now.tzinfo is not None and now.tzinfo.utcoffset(now) is not None)
+                
+                
 
                 
 
