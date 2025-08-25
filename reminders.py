@@ -75,7 +75,7 @@ def task_reminder_today():
             user_id = task.user_id # Get the user_id associated with the task
             user = User.query.get(user_id) # Get User from User Database using their ID
 
-            if user.email_notifications # Checks if user set email notifications to on and that email has not already been sent
+            if user.email_notifications: # Checks if user set email notifications to on and that email has not already been sent
                 task.set_today_reminder = False
                 email = user.email # Gets user's email from User Database
                 msg = Message(
