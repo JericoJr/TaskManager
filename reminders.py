@@ -27,7 +27,6 @@ def task_reminders_tomorrow():
             Task.status == 'In-Progress',
             Task.deadline >= now,
             Task.deadline <= tomorrow,
-            Task.set_tomorrow_reminder == True
         ).all()
 
         # Loop through all matching tasks
@@ -58,8 +57,7 @@ def task_reminder_today():
             Task.status == 'In-Progress',
             extract('year', Task.deadline) == today.year,
             extract('month', Task.deadline) == today.month,
-            extract('day', Task.deadline) == today.day,
-            Task.set_today_reminder == True
+            extract('day', Task.deadline) == today.day
         ).all()
 
         # Loops through all tasks that are due today, and sends email to users' email according to their id
@@ -68,18 +66,44 @@ def task_reminder_today():
             user = User.query.get(user_id) # Get User from User Database using their ID
 
             if user.email_notifications: # Checks if user set email notifications to on and that email has not already been sent
-                task.set_today_reminder = False
-                db.session.commit() # Saves any new changes to database
-
+                now = datetime.now()
+                curr_time = now.time() # Gets current time as time object
                 email = user.email # Gets user's email from User Database
-                msg = Message(
-                    subject=f"⏰ Task Reminder: {task.title} Due Today",
-                    recipients=[email],  # Send to user's email
-                    body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
-                    f"Description: {task.description}" 
-                )
-                # Send the email via Flask-Mail
-                mail.send(msg)
+                # 1st Reminder
+                if time(0,0) <= curr_time <= time(1,0): # Checks if current time is between 12am to 1am
+                    msg = Message(
+                        subject=f"⏰ Task Reminder: {task.title} Due Today",
+                        recipients=[email],  # Send to user's email
+                        body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
+                        f"Description: {task.description}" 
+                    )
+                    # Send the email via Flask-Mail
+                    mail.send(msg)
+                # 2nd Reminder
+                if (time(5,0) <= curr_time <= time(6,0)): # Checks if current time is between 5am and 6am
+                    time_left = task.deadline - now
+                    if task.deadline.time() >= time(6,0) and time_left > timedelta(hours=1): # Checks if task's deadline is past 6am and there is more than a hour until task is due
+                        msg = Message(
+                            subject=f"⏰ Task Reminder: {task.title} Due Sometime Today",
+                            recipients=[email],  # Send to user's email
+                            body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
+                            f"Description: {task.description}" 
+                        )
+                        # Send the email via Flask-Mail
+                        mail.send(msg)
+
+                # 3rd Reminder
+                time_left = task.deadline - now
+                if (timedelta(minutes=0) < time_left <= timedelta(hours=1)): # Checks if current time is 1 hour before or less than task's deadline
+                    msg = Message(
+                        subject=f"⏰ Task Reminder: {task.title} Due Soon",
+                        recipients=[email],  # Send to user's email
+                        body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
+                        f"Description: {task.description}" 
+                    )
+                    # Send the email via Flask-Mail
+                    mail.send(msg)
+                
 
                 
 
