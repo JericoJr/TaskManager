@@ -16,14 +16,16 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
 
 mail = Mail(app)
 
-def task_reminder_thour():
+def task_reminder_hour():
     with app.app_context():  # Create application context to access DB and Flask extensions
-        today = datetime.utcnow().date()
-        today_tasks = Task.query.filter( # Gets a list of all tasks that are not completed and due today
+        now = datetime.utcnow()
+        one_hour_from_now = now + timedelta(hours=1)
+
+
+        today_tasks = Task.query.filter( # Gets a list of all tasks that are not completed and due today and due within <= 1 hour
             Task.status == 'In-Progress',
-            extract('year', Task.deadline) == today.year,
-            extract('month', Task.deadline) == today.month,
-            extract('day', Task.deadline) == today.day
+            Task.deadline >= now,                   # Checks if the task deadline is within 1 hour window of current time and 1 hour ahead of current time
+            Task.deadline <= one_hour_from_now
         ).all()
 
         # Loops through all tasks that are due today, and sends email to users' email according to their id
@@ -35,6 +37,7 @@ def task_reminder_thour():
             if user.email_notifications and task.set_today_reminder != False: # Checks if user set email notifications to on and that email has not already been sent
                 task.set_today_reminder = False
                 db.session.commit()
+
                 msg = Message(
                     subject=f"⏰ Task Reminder: {task.title} Due Today",
                     recipients=[email],  # Send to user's email

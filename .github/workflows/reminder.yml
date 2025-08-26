@@ -45,8 +45,7 @@ jobs:
           elif [ "$HOUR" -eq 0 ]; then
             echo "script=reminders-tomorrow.py" >> "$GITHUB_OUTPUT" # Use reminders-tomorrow script
           else
-            echo "script=" >> "$GITHUB_OUTPUT"   # No script if outside scheduled hours
-            exit 0
+            echo "script=reminders-hour.py" >> "$GITHUB_OUTPUT" # Use reminders-hour script
 
       - name: Run reminders script
         if: steps.set-script.outputs.script != ''   # Only run if script is set above
