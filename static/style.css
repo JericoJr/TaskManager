@@ -611,6 +611,15 @@ button:hover {
     background-color:rgb(7, 206, 40);
 }
 
+.more-button {
+    width: 100%;
+    border-radius: 5px;
+    font-weight: bold;
+    font-family: 'Times New Roman';
+    color: black;
+    background-color: whitesmoke;
+}
+
 .prev-month, .next-month {
     font-weight: bold;
     font-size: medium;

@@ -97,7 +97,7 @@
                                             {% elif ns.show_more == true %}
                                                 {% set ns.show_more = false %}
                                                 <a href="{{ url_for('view_more_tasks', deadline=task.deadline.strftime('%Y-%m-%d'))}}">
-                                                    <button type="button" class="more-button"> More </button>
+                                                    <button type="button" class="more-button"> ... </button>
                                                 </a>
                                             {% endif %}
                                         {% endif %}
