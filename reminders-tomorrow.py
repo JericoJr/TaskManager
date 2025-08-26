@@ -48,40 +48,8 @@ def task_reminders_tomorrow():
                 print(f"Sending email to {user.email} for task {task.title}")
                 # Send the email via Flask-Mail
                 mail.send(msg)
-        
-
-def task_reminder_today():
-    with app.app_context():  # Create application context to access DB and Flask extensions
-        today = datetime.utcnow().date()
-        today_tasks = Task.query.filter( # Gets a list of all tasks that are not completed and due today
-            Task.status == 'In-Progress',
-            extract('year', Task.deadline) == today.year,
-            extract('month', Task.deadline) == today.month,
-            extract('day', Task.deadline) == today.day
-        ).all()
-
-        # Loops through all tasks that are due today, and sends email to users' email according to their id
-        for task in today_tasks:
-            user_id = task.user_id # Get the user_id associated with the task
-            user = User.query.get(user_id) # Get User from User Database using their ID
-            email = user.email
-
-            if user.email_notifications and task.set_today_reminder != False: # Checks if user set email notifications to on and that email has not already been sent
-                task.set_today_reminder = False
-                db.session.commit()
-                msg = Message(
-                    subject=f"⏰ Task Reminder: {task.title} Due Today",
-                    recipients=[email],  # Send to user's email
-                    body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
-                    f"Description: {task.description}" 
-                )
-                # Send the email via Flask-Mail
-                mail.send(msg)
-                
-                
-
+    
                 
 
 if __name__ == "__main__":
     task_reminders_tomorrow()     
-    task_reminder_today()                            

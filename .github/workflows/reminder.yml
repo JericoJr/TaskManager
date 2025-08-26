@@ -2,8 +2,9 @@ name: Send Email Reminders
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # Runs every 30 min
-  workflow_dispatch:      # Allows manual triggering
+    - cron: '0 5 * * *'     # 5:00 AM UTC – run reminder_today.py
+    - cron: '0 20 * * *'    # 8:00 PM UTC – run reminder_tomorrow.py
+  workflow_dispatch:
 
 jobs:
   run-reminder-script:
@@ -23,11 +24,26 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Determine which reminder script to run
+        id: set-script
+        run: |
+          HOUR=$(date -u +"%H")
+          if [ "$HOUR" -eq 5 ]; then
+            echo "script=reminder-today.py" >> $GITHUB_OUTPUT
+          elif [ "$HOUR" -eq 20 ]; then
+            echo "script=reminder-tomorrow.py" >> $GITHUB_OUTPUT
+          else
+            echo "script=" >> $GITHUB_OUTPUT
+            exit 0
+        outputs:
+          script: ${{ steps.set-script.outputs.script }}
+
       - name: Run reminders script
+        if: steps.set-script.outputs.script != ''
         env:
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-        run: python reminders.py
+        run: python ${{ steps.set-script.outputs.script }}
 
       - name: Debug log
         if: always()
