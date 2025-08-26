@@ -1,20 +1,36 @@
 # Task Manager Web App
 
-A simple Task Manager web application built using Flask, Python, HTML, CSS, Jinja, and JavaScript. This project demonstrates basic web app functionality, including routing, templates, and features like kuser logins, email notifications, task scheduling.
+A modern Task Manager Web Application built with Flask, Python, HTML, CSS, Jinja, and JavaScript.
+
+This project helps users create, edit, organize, and track tasks efficiently through a task table that stores key details such as the title, description, deadline, priority, and status. Tasks can be sorted and filtered by date, priority, status, or other fields, making it easier to manage both short- and long-term goals.
+
+To keep users on track, the app supports automated email reminders scheduled with GitHub Actions (cron workflow):
+
+-9 AM UTC (5 AM EDT) → Sends reminders for tasks due today
+
+-12 AM UTC (8 PM EDT) → Sends reminders for tasks due tomorrow
+
+All user accounts and tasks are stored locally in an SQLite database. Users can register with their email and password, and multiple accounts are supported—ensuring each user’s tasks remain securely linked to their profile.
+
+For better visualization, the app includes a real-time calendar that dynamically updates with task deadlines, allowing users to view tasks by day, week, or month and drill down into specific dates.
 
 ---
 
-## Features
+## 🚀 Features
+- 🔐 **User Authentication** – Register, log in, and manage personal tasks.
+- 🗂️ **Task Management** – Create, edit, delete, and mark tasks as completed or in-progress.
+- ⚡ **Prioritization & Filtering** – Organize and filter tasks within tasks table by priority (low, medium, high), status, deadlines, or creation date.
+- 📬 **Email Notifications** – For new user signup and forgot-password including optional email task deadline reminders.
+- 📅 **Real-time Calendar** – Visualize task deadlines by the day, week, and month.
+- 📊 **Progress Tracking** – Includes a progress bar, statistics table, and summary of urgent tasks.
+- ⏰ **Reminders** – Highlight the top 3 important tasks due today or next following tasks by their deadline.
 
-- Flask-based backend with routing and templating
-- Task management functionality: Ability to create, schedule, edit, and delete tasks
-- Ability to organize and priotize Tasks by levels from low, medium, and high and check if they are completed or in-progress
-- Ability to filter out tasks in the tasks table according to its categories by their date, deadline, status, priority, date of         creation, and etc.
-- Email notifications for new user signup and optional task deadline using Flask-Mail
-- Real-time Calendar with up-to date tasks's deadline
-- Includes a progress bar and statistics table to track task info and usage
-- Includes a summary section and reminders lists to showcase important tasks that are due for the user today or within that week
+---
 
+## 🛠️ Tech Stack
+- **Backend**: Flask (Python)
+- **Frontend**: HTML, CSS, JavaScript, Jinja2
+- **Database**: SQLite (default)  
 
 ---
 
