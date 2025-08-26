@@ -2,8 +2,8 @@ name: Send Email Reminders
 
 on:
   schedule:
-    - cron: '0 9 * * *'     # 5:00 AM EDT
-    - cron: '0 0 * * *'     # 8:00 PM EDT
+    - cron: '0 9 * * *'     # 9:00 AM UTC == 5:00 AM EDT
+    - cron: '0 0 * * *'     # 12:00 AM UTC == 8:00 PM EDT
   workflow_dispatch:
 
 jobs:
