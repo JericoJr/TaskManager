@@ -4,6 +4,7 @@ on:
   schedule:
     - cron: '0 9 * * *'      # Run every day at 9:00 AM UTC (5:00 AM EDT) → send "today" reminders
     - cron: '0 0 * * *'      # Run every day at 12:00 AM UTC (8:00 PM EDT) → send "tomorrow" reminders
+    - cron: '0 * * * *'       # Runs every hour
   workflow_dispatch:          # Allows manual triggering of this workflow from the GitHub Actions tab
 
 jobs:
