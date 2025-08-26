@@ -55,3 +55,15 @@ Follow these steps to get the project up and running locally:
     i. "python app.py"
     ii. Access App by clicking on this link: "http://127.0.0.1:5000" (Click on using CTRL)
 
+---
+
+## Important Notes
+- This project uses a local SQLite database (`taskmanager.db`) to store tasks and user data.  
+- Since GitHub Actions runs on the repository version of the database, **you must commit and push the database file whenever you add or update tasks and users** to ensure reminders for GitHub Actions work correctly.  
+- Example workflow:
+  ```bash
+  git add instance/taskmanager.db
+  git commit -m "Update tasks"
+  git push
+
+
