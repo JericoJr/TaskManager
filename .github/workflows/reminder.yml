@@ -32,9 +32,9 @@ jobs:
         run: |
           HOUR=$(date -u +"%H")
           if [ "$HOUR" -eq 9 ]; then
-            echo "script=reminder-today.py" >> "$GITHUB_OUTPUT"
+            echo "script=reminders-today.py" >> "$GITHUB_OUTPUT"
           elif [ "$HOUR" -eq 0 ]; then
-            echo "script=reminder-tomorrow.py" >> "$GITHUB_OUTPUT"
+            echo "script=reminders-tomorrow.py" >> "$GITHUB_OUTPUT"
           else
             echo "script=" >> "$GITHUB_OUTPUT"
             exit 0
