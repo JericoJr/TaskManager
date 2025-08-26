@@ -1,52 +1,66 @@
-name: Send Email Reminders
+name: Send Email Reminders   # Name of the workflow, shows up in GitHub Actions tab
 
 on:
   schedule:
-    - cron: '0 9 * * *'     # 9:00 AM UTC == 5:00 AM EDT
-    - cron: '0 0 * * *'     # 12:00 AM UTC == 8:00 PM EDT
-  workflow_dispatch:
+    - cron: '0 9 * * *'      # Run every day at 9:00 AM UTC (5:00 AM EDT) → send "today" reminders
+    - cron: '0 0 * * *'      # Run every day at 12:00 AM UTC (8:00 PM EDT) → send "tomorrow" reminders
+  workflow_dispatch:          # Allows manual triggering of this workflow from the GitHub Actions tab
 
 jobs:
-  run-reminder-script:
-    runs-on: ubuntu-latest
+  run-reminder-script:        # The job name, can be referenced if multiple jobs exist
+    runs-on: ubuntu-latest    # Runner environment (Linux VM provided by GitHub)
 
-    outputs:
+    outputs:                  # Define job outputs (used here to pass which script to run)
       script: ${{ steps.set-script.outputs.script }}
 
-    steps:
+    steps:                    # Ordered list of steps in this job
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3   # Pulls your repository code into the runner
+
+      # Restore database artifact from the last workflow run
+      - name: Download database artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: task-database       # The name you chose for the database artifact
+          path: instance            # Path to place it inside the workflow (instance/ folder)
+        continue-on-error: true     # If no artifact exists yet (first run), don't fail the workflow
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.11'    # Install and use Python 3.11 on the runner
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip   # Upgrade pip
+          pip install -r requirements.txt       # Install Python dependencies for your app
 
       - name: Determine which reminder script to run
-        id: set-script
+        id: set-script                 # ID for referencing outputs later
         run: |
-          HOUR=$(date -u +"%H")
+          HOUR=$(date -u +"%H")        # Get the current UTC hour
           if [ "$HOUR" -eq 9 ]; then
-            echo "script=reminders-today.py" >> "$GITHUB_OUTPUT"
+            echo "script=reminders-today.py" >> "$GITHUB_OUTPUT"   # Use reminders-today script
           elif [ "$HOUR" -eq 0 ]; then
-            echo "script=reminders-tomorrow.py" >> "$GITHUB_OUTPUT"
+            echo "script=reminders-tomorrow.py" >> "$GITHUB_OUTPUT" # Use reminders-tomorrow script
           else
-            echo "script=" >> "$GITHUB_OUTPUT"
+            echo "script=" >> "$GITHUB_OUTPUT"   # No script if outside scheduled hours
             exit 0
-          fi
 
       - name: Run reminders script
-        if: steps.set-script.outputs.script != ''
-        env:
-          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-        run: python ${{ steps.set-script.outputs.script }}
+        if: steps.set-script.outputs.script != ''   # Only run if script is set above
+        env:                                       # Environment variables pulled from GitHub Secrets
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }} # Your email username (stored in repo settings → Secrets)
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }} # Your email password (also from Secrets)
+        run: python ${{ steps.set-script.outputs.script }} # Run the correct reminder script
+
+      # Save the updated database back as artifact for the next workflow run
+      - name: Upload database artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: task-database            # Same name as above, so future runs know what to download
+          path: instance/tasks.db        # Path to the SQLite DB file
 
       - name: Debug log
-        if: always()
-        run: echo "Reminders script completed"
+        if: always()                     # Always runs, even if previous steps fail
+        run: echo "Reminders script completed"   # Simple log to show completion in Actions tab
