@@ -38,6 +38,7 @@ jobs:
           else
             echo "script=" >> "$GITHUB_OUTPUT"
             exit 0
+          fi
 
       - name: Run reminders script
         if: steps.set-script.outputs.script != ''
