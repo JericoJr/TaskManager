@@ -60,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: taskmanager           # Same name as above, so future runs know what to download
-          path: instance/tasks.db        # Path to the SQLite DB file
+          path: instance/taskmanager.db        # Path to the SQLite DB file
 
       - name: Debug log
         if: always()                     # Always runs, even if previous steps fail
