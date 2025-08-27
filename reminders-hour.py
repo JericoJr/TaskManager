@@ -33,9 +33,11 @@ def task_reminder_hour():
         # Loops through all tasks that are due today, and sends email to users' email according to their id
         for task in today_tasks:
 
-            now = datetime.now() # Gets current time as UTC
+            utc_time = datetime.now(timezone.utc)  # Gets current UTC time
 
-            time_left = task.deadline - now
+            edt_time = utc_time - timedelta(hours=4)
+
+            time_left = task.deadline - edt_time
 
             # If time_left is <= 1 hour then send email
             if timedelta(0) <= time_left <= timedelta(hours=1):
