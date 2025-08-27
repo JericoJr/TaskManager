@@ -23,7 +23,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: taskmanager         # The name you chose for the database artifact
-          path: instance            # Path to place it inside the workflow (instance/ folder)
+          path: .                   # Path to place it inside the workflow (instance/ folder)
         continue-on-error: true     # If no artifact exists yet (first run), don't fail the workflow
 
       - name: Set up Python
@@ -55,12 +55,17 @@ jobs:
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }} # Your email password (also from Secrets)
         run: python ${{ steps.set-script.outputs.script }} # Run the correct reminder script
 
+      - name: Debug database location
+        run: |
+          echo "Listing files..."
+          ls -R .
+
       # Save the updated database back as artifact for the next workflow run
       - name: Upload database artifact
         uses: actions/upload-artifact@v4
         with:
           name: taskmanager           # Same name as above, so future runs know what to download
-          path: instance/taskmanager.db        # Path to the SQLite DB file
+          path: taskmanager.db        # Path to the SQLite DB file
 
       - name: Debug log
         if: always()                     # Always runs, even if previous steps fail
