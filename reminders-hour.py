@@ -27,6 +27,9 @@ def task_reminder_hour():
             Task.deadline >= now,                   # Checks if the task deadline is within 1 hour window of current time and 1 hour ahead of current time
             Task.deadline <= one_hour_from_now
         ).all()
+        
+        print("COLLECTED Tasks")
+
 
         # Loops through all tasks that are due today, and sends email to users' email according to their id
         for task in today_tasks:
