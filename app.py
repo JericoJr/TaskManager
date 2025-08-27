@@ -6,7 +6,6 @@ import calendar
 
 from datetime import datetime, timedelta, date, timezone
 from sqlalchemy import extract, func, case
-import pytz
 
 
 # Import necessary Flask classes and functions to build the web app
@@ -22,6 +21,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 
 from dotenv import load_dotenv
+import pytz
 
 
 # Create Flask app and set instance_relative_config to True so we can use the instance folder
@@ -576,13 +576,8 @@ def add_task():
     priority = request.form['priority']
     date = request.form['deadline']
 
-    # Assume user inputs in local timezone (change as needed!)
-    user_tz = pytz.timezone("US/Eastern")  # Or detect dynamically from user
-    local_dt = datetime.strptime(date, '%Y-%m-%dT%H:%M')
-    local_dt = user_tz.localize(local_dt)
-
-    # Convert to UTC before saving
-    deadline = local_dt.astimezone(timezone.utc)
+    #Convert date string into datetime object
+    deadline = datetime.strptime(date, '%Y-%m-%dT%H:%M') # typical date string is '2025-08-12T15:30'
 
     # Create a new Task instance with its elements like title, description, priority, deadline, status
     new_task = Task(title=title) # Note: title(database column) = title(local variable)
