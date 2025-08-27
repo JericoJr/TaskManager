@@ -18,7 +18,7 @@ mail = Mail(app)
 
 def task_reminder_today():
     with app.app_context():  # Create application context to access DB and Flask extensions
-        today = datetime.utcnow().date()
+        today = datetime.today()
         today_tasks = Task.query.filter( # Gets a list of all tasks that are not completed and due today
             Task.status == 'In-Progress',
             extract('year', Task.deadline) == today.year,

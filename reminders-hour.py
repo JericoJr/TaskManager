@@ -18,7 +18,7 @@ mail = Mail(app)
 
 def task_reminder_hour():
     with app.app_context():  # Create application context to access DB and Flask extensions
-        today = datetime.utcnow().date()
+        today = datetime.today()
 
         today_tasks = Task.query.filter( # Gets a list of all tasks that are not completed and due today and due within <= 1 hour
             Task.status == 'In-Progress',
@@ -55,7 +55,7 @@ def task_reminder_hour():
                     db.session.commit()
 
                     msg = Message(
-                        subject=f"⏰ Task Reminder: {task.title} Due Today",
+                        subject=f"⏰ Task Reminder: {task.title} Due in Less than an Hour",
                         recipients=[email],  # Send to user's email
                         body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
                         f"Description: {task.description}" 

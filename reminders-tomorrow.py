@@ -19,7 +19,7 @@ mail = Mail(app)
 # Create a 24-hour reminder email notification for users' task
 def task_reminders_tomorrow():
     with app.app_context():  # Create application context to access DB and Flask extensions
-        now = datetime.utcnow()  
+        now = datetime.today() 
         
         tomorrow = (now + timedelta(days=1)) # Adds current day by 1 day to get tomorrow's date
 
