@@ -22,7 +22,7 @@ jobs:
       - name: Download database artifact
         uses: actions/download-artifact@v4
         with:
-          name: task-database       # The name you chose for the database artifact
+          name: taskmanager         # The name you chose for the database artifact
           path: instance            # Path to place it inside the workflow (instance/ folder)
         continue-on-error: true     # If no artifact exists yet (first run), don't fail the workflow
 
@@ -59,7 +59,7 @@ jobs:
       - name: Upload database artifact
         uses: actions/upload-artifact@v4
         with:
-          name: task-database            # Same name as above, so future runs know what to download
+          name: taskmanager           # Same name as above, so future runs know what to download
           path: instance/tasks.db        # Path to the SQLite DB file
 
       - name: Debug log
