@@ -20,7 +20,7 @@ jobs:
 
       # Restore database artifact from the last workflow run
       - name: Download database artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: task-database       # The name you chose for the database artifact
           path: instance            # Path to place it inside the workflow (instance/ folder)
@@ -56,7 +56,7 @@ jobs:
 
       # Save the updated database back as artifact for the next workflow run
       - name: Upload database artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: task-database            # Same name as above, so future runs know what to download
           path: instance/tasks.db        # Path to the SQLite DB file
