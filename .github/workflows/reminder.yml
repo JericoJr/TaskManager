@@ -1,62 +1,67 @@
-name: Send Email Reminders   # Name of the workflow, shows up in GitHub Actions tab 
+name: Send Email Reminders   # Name of the workflow, shows up in GitHub Actions tab
 
 on:
   schedule:
-    # Run every day at 9:00 AM UTC (5:00 AM EDT) → send "today" reminders
-    - cron: '0 9 * * *'
-    # Run every day at 12:00 AM UTC (8:00 PM EDT) → send "tomorrow" reminders
-    - cron: '0 0 * * *'
-    # Run every hour → used for hourly reminders
-    - cron: '0 * * * *'
-  workflow_dispatch:          # Allows you to manually trigger this workflow from the GitHub Actions tab
+    - cron: '0 9 * * *'      # Run every day at 9:00 AM UTC (5:00 AM EDT) → send "today" reminders
+    - cron: '0 0 * * *'      # Run every day at 12:00 AM UTC (8:00 PM EDT) → send "tomorrow" reminders
+    - cron: '0 * * * *'       # Runs every hour
+  workflow_dispatch:          # Allows manual triggering of this workflow from the GitHub Actions tab
 
 jobs:
-  run-reminder-script:
+  run-reminder-script:        # The job name, can be referenced if multiple jobs exist
     runs-on: ubuntu-latest    # Runner environment (Linux VM provided by GitHub)
 
-    outputs:                  # Define job outputs (used here to pass which script to run later)
+    outputs:                  # Define job outputs (used here to pass which script to run)
       script: ${{ steps.set-script.outputs.script }}
 
-    steps:
-      # Step 1: Checkout repository code
+    steps:                    # Ordered list of steps in this job
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3   # Pulls your repository code into the runner
 
-      # Step 2: Restore database artifact (SQLite file) from last workflow run
+      # Restore database artifact from the last workflow run
       - name: Download database artifact
         uses: actions/download-artifact@v4
         with:
-          name: task-database       # Must match the name used in the upload step
-          path: instance            # Place inside instance/ folder
-        continue-on-error: true     # Don’t fail if no artifact exists yet (first run)
+          name: task-database       # The name you chose for the database artifact
+          path: instance            # Path to place it inside the workflow (instance/ folder)
+        continue-on-error: true     # If no artifact exists yet (first run), don't fail the workflow
 
-      # Step 3: Set up Python 3.11 environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.11'    # Install and use Python 3.11 on the runner
 
-      # Step 4: Install dependencies from requirements.txt
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip   # Upgrade pip
+          pip install -r requirements.txt       # Install Python dependencies for your app
 
-      #  Step 5: Decide which reminder script should run based on current UTC hour
       - name: Determine which reminder script to run
-        id: set-script
+        id: set-script                 # ID for referencing outputs later
         run: |
-          HOUR=$(date -u +"%H")   # Get the current UTC hour (00–23)
+          HOUR=$(date -u +"%H")        # Get the current UTC hour
           if [ "$HOUR" -eq 9 ]; then
-            # At 9:00 UTC → send today's reminders
-            echo "script=reminders-today.py" >> "$GITHUB_OUTPUT"
+            echo "script=reminders-today.py" >> "$GITHUB_OUTPUT"   # Use reminders-today script
           elif [ "$HOUR" -eq 0 ]; then
-            # At 0:00 UTC → send tomorrow's reminders
-            echo "script=reminders-tomorrow.py" >> "$GITHUB_OUTPUT"
+            echo "script=reminders-tomorrow.py" >> "$GITHUB_OUTPUT" # Use reminders-tomorrow script
           else
-            # All other hours → send hourly reminders
-            echo "script=reminders-hour.py" >> "$GITHUB_OUTPUT"
-          fi   # required to close the if-block!
+            echo "script=reminders-hour.py" >> "$GITHUB_OUTPUT" # Use reminders-hour script
+          fi
 
-      # ✅ Step 6: Run the chosen Python script
-      - name: Run remind
+      - name: Run reminders script
+        if: steps.set-script.outputs.script != ''   # Only run if script is set above
+        env:                                       # Environment variables pulled from GitHub Secrets
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }} # Your email username (stored in repo settings → Secrets)
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }} # Your email password (also from Secrets)
+        run: python ${{ steps.set-script.outputs.script }} # Run the correct reminder script
+
+      # Save the updated database back as artifact for the next workflow run
+      - name: Upload database artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: task-database            # Same name as above, so future runs know what to download
+          path: instance/tasks.db        # Path to the SQLite DB file
+
+      - name: Debug log
+        if: always()                     # Always runs, even if previous steps fail
+        run: echo "Reminders script completed"   # Simple log to show completion in Actions tab
