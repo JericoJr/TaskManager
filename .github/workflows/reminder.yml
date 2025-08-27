@@ -18,14 +18,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3   # Pulls your repository code into the runner
 
-      # Restore database artifact from the last workflow run
-      - name: Download database artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: taskmanager         # The name you chose for the database artifact
-          path: .                   # Path to place it inside the workflow (instance/ folder)
-        continue-on-error: true     # If no artifact exists yet (first run), don't fail the workflow
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -58,14 +50,7 @@ jobs:
       - name: Debug database location
         run: |
           echo "Listing files..."
-          ls -R .
-
-      # Save the updated database back as artifact for the next workflow run
-      - name: Upload database artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: taskmanager           # Same name as above, so future runs know what to download
-          path: taskmanager.db        # Path to the SQLite DB file
+          ls -R .                                  # Verify that taskmanager.db exists
 
       - name: Debug log
         if: always()                     # Always runs, even if previous steps fail
