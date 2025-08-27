@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone, date, time     # Import date
 from app import db, app, mail, Task, User               # Import app components and database models
 from flask_apscheduler import APScheduler               # Import scheduler for periodic jobs
 from sqlalchemy import extract, func, case
+from zoneinfo import ZoneInfo
 
 import os
 
@@ -36,8 +37,14 @@ def task_reminder_hour():
             utc_time = datetime.now(timezone.utc)  # Gets current UTC time
 
             edt_time = utc_time - timedelta(hours=4)
+          # If deadline is naive, treat it as EDT/EST
+            if task.deadline.tzinfo is None:
+                task_deadline_edt = task.deadline.replace(tzinfo=ZoneInfo("America/New_York"))
+            else:
+                task_deadline_edt = task.deadline.astimezone(ZoneInfo("America/New_York"))
 
-            time_left = task.deadline - edt_time
+            # Time left
+            time_left = task_deadline_edt - edt_time
 
             # If time_left is <= 1 hour then send email
             if timedelta(0) <= time_left <= timedelta(hours=1):
