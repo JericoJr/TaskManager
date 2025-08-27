@@ -18,7 +18,7 @@ mail = Mail(app)
 
 def task_reminder_hour():
     with app.app_context():  # Create application context to access DB and Flask extensions
-        now = datetime.utcnow(timezone.utc)
+        now = datetime.now(timezone.utc)
         one_hour_from_now = now + timedelta(hours=1)
 
 
