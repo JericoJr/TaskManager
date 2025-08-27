@@ -30,6 +30,8 @@ def task_reminder_hour():
 
         # Loops through all tasks that are due today, and sends email to users' email according to their id
         for task in today_tasks:
+            print(f"Found task: {task.title} deadline={task.deadline} user={task.user_id}")
+
             user_id = task.user_id # Get the user_id associated with the task
             user = User.query.get(user_id) # Get User from User Database using their ID
             email = user.email
