@@ -41,7 +41,7 @@ def task_reminder_hour():
                     task_deadline = task.deadline.replace(tzinfo=timezone.utc)
                 else:
                     task_deadline = task.deadline
-                
+                print(f"task_deadline: {task_deadline}; current_time: {datetime.now(timezone.utc).astimezone(user_tz)}")
                 # Now check if due within the next hour
                 time_left = task_deadline - datetime.now(timezone.utc).astimezone(user_tz)
                 # Convert time_left into seconds
