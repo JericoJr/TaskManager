@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '0 9 * * *'      # Run every day at 9:00 AM UTC (5:00 AM EDT) → send "today" reminders
     - cron: '0 0 * * *'      # Run every day at 12:00 AM UTC (8:00 PM EDT) → send "tomorrow" reminders
-    - cron: '1 * * * *'       # Runs every 1st minute of hour (exa. 9:01, 10:01, 11:01, etc.)
+    - cron: '0 * * * *'       # Runs hourly
   workflow_dispatch:          # Allows manual triggering of this workflow from the GitHub Actions tab
 
 jobs:
@@ -32,9 +32,9 @@ jobs:
         id: set-script                 # ID for referencing outputs later
         run: |
           HOUR=$(date -u +"%H")        # Get the current UTC hour
-          if [ "$HOUR" -eq 9 ]; then
+          if [ "$HOUR" -eq 9 ] && [ "$MINUTE" -eq 0 ]; then
             echo "script=reminders-today.py" >> "$GITHUB_OUTPUT"   # Use reminders-today script
-          elif [ "$HOUR" -eq 0 ]; then
+          elif [ "$HOUR" -eq 0 ] && [ "$MINUTE" -eq 0 ]; then
             echo "script=reminders-tomorrow.py" >> "$GITHUB_OUTPUT" # Use reminders-tomorrow script
           else
             echo "script=reminders-hour.py" >> "$GITHUB_OUTPUT" # Use reminders-hour script

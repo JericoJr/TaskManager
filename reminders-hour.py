@@ -57,9 +57,6 @@ def task_reminder_hour():
                     email = user.email
 
                     if user.email_notifications and task.set_today_reminder != False: # Checks if user set email notifications to on and that email has not already been sent
-                        task.set_today_reminder = False
-                        db.session.commit()
-
                         msg = Message(
                             subject=f"⏰ Task Reminder: {task.title} Due in Less than an Hour",
                             recipients=[email],  # Send to user's email
