@@ -39,6 +39,7 @@ def task_reminder_hour():
             else:
                 task_deadline = task.deadline.astimezone(user_tz)
 
+            print(f"curr-time: {user_today} curr-time_format: {user_today.strftime('%B %d %Y @ %I:%M %p')}")
             # Checks if current task deadline is today in user's timezone
             if task_deadline.date() == user_today:
                 print(f"Matched today's task: {task.title} deadline={task.deadline} deadline_format={task.deadline.strftime('%B %d %Y @ %I:%M %p')} user={task.user_id}")
