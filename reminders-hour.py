@@ -42,7 +42,6 @@ def task_reminder_hour():
                 else:
                     task_deadline_local = task.deadline
 
-                # current_time = datetime.now(user_tz)
                 print(f"task_deadline: {task_deadline_local}; current_time: {datetime.now(timezone.utc).astimezone(user_tz)}")
                 # Now check if due within the next hour
                 time_hour_left = task_deadline_local.hour - datetime.now(user_tz).hour
@@ -50,8 +49,6 @@ def task_reminder_hour():
 
                 time_left_total_minutes = (time_hour_left * 60) + time_min_left
 
-                # time_left = task_deadline_local - current_time
-                # time_left_total_minutes = int(time_left.total_seconds() / 60)
                 print(f"Time left: {time_left_total_minutes}")
                 # If time_left is <= 1 hour or between 0 to 60 minutes then send email
                 if 0 <= time_left_total_minutes<= 60:
