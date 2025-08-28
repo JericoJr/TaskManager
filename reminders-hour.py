@@ -19,7 +19,9 @@ mail = Mail(app)
 
 def task_reminder_hour():
     with app.app_context():  # Create application context to access DB and Flask extensions
-        today_tasks = Task.query.filter(Task.status == 'In-Progress').all()
+        today_tasks = Task.query.filter_by(
+            Task.status == 'In-Progress',
+        ).all()
         print(f"TASKS COLLECTED: {len(today_tasks)}")
 
         for task in today_tasks:
@@ -32,19 +34,20 @@ def task_reminder_hour():
 
             # Convert given task deadline into user's tz
             if task.deadline.tzinfo is None:
-                    # Assume UTC if naive
-                    task_deadline = task.deadline.replace(tzinfo=timezone.utc).astimezone(user_tz)
+                # Assume UTC if naive
+                task_deadline = task.deadline.replace(tzinfo=timezone.utc).astimezone(user_tz)
             else:
                 task_deadline = task.deadline.astimezone(user_tz)
 
             # Checks if current task deadline is today in user's timezone
             if task_deadline.date() == user_today:
+                print(f"Matched today's task: {task.title} deadline={task.deadline} deadline_format={task.deadline.strftime('%B %d %Y @ %I:%M %p')} user={task.user_id}")
                 # Now check if due within the next hour
                 time_left = task_deadline - datetime.now(timezone.utc).astimezone(user_tz)
    
                 # If time_left is <= 1 hour then send email
                 if timedelta(0) <= time_left <= timedelta(hours=1):
-                    print(f"Found task: {task.title} deadline={task.deadline} user={task.user_id} time={time_left}")
+                    print(f"Matched 1-hour task: {task.title} deadline={task.deadline} user={task.user_id} time={time_left}")
 
                     email = user.email
 
