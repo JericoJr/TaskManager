@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone, date, time     # Import date
 from app import db, app, mail, Task, User               # Import app components and database models
 from flask_apscheduler import APScheduler               # Import scheduler for periodic jobs
 from sqlalchemy import extract, func, case
+from zoneinfo import ZoneInfo
 
 import os
 
@@ -18,34 +19,38 @@ mail = Mail(app)
 
 def task_reminder_today():
     with app.app_context():  # Create application context to access DB and Flask extensions
-        today = datetime.today()
-        today_tasks = Task.query.filter( # Gets a list of all tasks that are not completed and due today
-            Task.status == 'In-Progress',
-            extract('year', Task.deadline) == today.year,
-            extract('month', Task.deadline) == today.month,
-            extract('day', Task.deadline) == today.day
+        tasks = Task.query.filter(
+            Task.status == 'In-Progress'
         ).all()
+        print(f"TASKS COLLECTED: {len(tasks)}")
 
-        print(f"TASKS COLLECTED: {len(today_tasks)}")
+        for task in tasks:
+            print(f"Found task: {task.title} deadline={task.deadline} deadline_format={task.deadline.strftime('%B %d %Y @ %I:%M %p')} user={task.user_id}")
+            user = User.query.get(task.user_id) # Get User Object of given task
+            user_tz = ZoneInfo(user.timezone) # Get User's timezone
 
-        # Loops through all tasks that are due today, and sends email to users' email according to their id
-        for task in today_tasks:
-            print(f"Task Title: {task.title}, Task Deadline: {task.deadline.strftime('%B %d %Y @ %I:%M %p')}")
-            user_id = task.user_id # Get the user_id associated with the task
-            user = User.query.get(user_id) # Get User from User Database using their ID
-            email = user.email
+            # Current local date for the user
+            user_today = datetime.now(timezone.utc).astimezone(user_tz).date()
+            print(f"curr-day: {user_today}")
+            # Checks if current task deadline is today in user's timezone
+            if task.deadline.date() == user_today:
+                print(f"Matched today's task: {task.title} deadline={task.deadline} deadline_format={task.deadline.strftime('%B %d %Y @ %I:%M %p')} user={task.user_id}")
 
-            if user.email_notifications and task.set_today_reminder != False: # Checks if user set email notifications to on and that email has not already been sent
-                task.set_today_reminder = False
-                db.session.commit()
-                msg = Message(
-                    subject=f"⏰ Task Reminder: {task.title} Due Today",
-                    recipients=[email],  # Send to user's email
-                    body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}."
-                    f"Description: {task.description}" 
-                )
-                # Send the email via Flask-Mail
-                mail.send(msg)
+                user_id = task.user_id # Get the user_id associated with the task
+                user = User.query.get(user_id) # Get User from User Database using their ID
+                email = user.email
+
+                if user.email_notifications and task.set_today_reminder != False: # Checks if user set email notifications to on and that email has not already been sent
+                    task.set_today_reminder = False
+                    db.session.commit()
+                    msg = Message(
+                        subject=f"⏰ Task Reminder: {task.title} Due Today",
+                        recipients=[email],  # Send to user's email
+                        body=f"Your task '{task.title}' is due today at {task.deadline.strftime('%I:%M %p')}.\n\n"
+                        f"Description: {task.description}" 
+                    )
+                    # Send the email via Flask-Mail
+                    mail.send(msg)
                 
 if __name__ == "__main__":
     task_reminder_today()                            
