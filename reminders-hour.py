@@ -19,8 +19,8 @@ mail = Mail(app)
 
 def task_reminder_hour():
     with app.app_context():  # Create application context to access DB and Flask extensions
-        today_tasks = Task.query.filter_by(
-            Task.status == 'In-Progress',
+        today_tasks = Task.query.filter(
+            Task.status == 'In-Progress'
         ).all()
         print(f"TASKS COLLECTED: {len(today_tasks)}")
 
