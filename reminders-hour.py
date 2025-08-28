@@ -23,6 +23,7 @@ def task_reminder_hour():
         print(f"TASKS COLLECTED: {len(today_tasks)}")
 
         for task in today_tasks:
+            print(f"Found task: {task.title} deadline={task.deadline} user={task.user_id} time={time_left}")
             user = User.query.get(task.user_id) # Get User Object of given task
             user_tz = ZoneInfo(user.timezone) # Get User's timezone
 
