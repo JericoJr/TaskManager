@@ -14,18 +14,22 @@
                 <!--Clicking change password header will trigger a change password popup-->
                 <a href="#" onclick="openPopup('change-password')">Change Password</a> <br>
                 <!--Clicking delete account header will trigger a delete account popup-->
-                <a href="#" onclick="openPopup('delete-account')">Delete Account</a>
-                <!--Flash Messages for Login Note: different types like 'success' and 'error'-->
+                <a href="#" onclick="openPopup('delete-account')">Delete Account</a> <br>
+                <!--Clicking change timezone header will trigger a change timezone popup-->
+                <a href="#" onclick="openPopup('change-timezone')">Change Timezone</a> 
+                <p style="margin-left: 24px;">Current Timezone: {{ timezone }}</p>
             </section>
         </section>
         <section class="preferences">
             <h2 class="subtitle">Preferences</h2>
             <section class="preferences-items">
                 <!--Clicking email notifications header will trigger a email notifications popup-->
-                <a href="#" onclick="openPopup('notifications')" >Email Notifications</a> <br>
+                <a href="#" onclick="openPopup('notifications')" >Email Notifications</a> 
+                <p style="margin-left: 24px;">Notifications: {{ notifications }}</p>
                 <!--Clicking delete data header will trigger a delete data popup-->
                 <a href="#" onclick="openPopup('delete-data')">Delete Data</a>
             </section>
+            <!--Flash Messages for Login Note: different types like 'success' and 'error'-->
             {% with messages = get_flashed_messages(with_categories=true) %} 
                 {% if messages %}
                     {% for category, message in messages %}
@@ -101,6 +105,26 @@
                 <label>Sure you want to clear all data of this Account?</label>  <br>
                 <button type="submit" name="delete-date">Yes</button>
                 <button type="button" onclick="closePopup('delete-data')">No</button>
+            </form>
+        </div>
+
+        <!--Change Timezone Popup-->
+        <div class="popup" id="change-timezone">
+            <form method="POST" action="{{ url_for('change_timezone') }}">
+                <label>Select Timezone:</label>  <br>
+                <select name="timezone" id="timezone-list" required>
+                    <option value="America/New_York">Eastern Time (US & Canada)</option>
+                    <option value="America/Chicago">Central Time (US & Canada)</option>
+                    <option value="America/Denver">Mountain Time (US & Canada)</option>
+                    <option value="America/Los_Angeles">Pacific Time (US & Canada)</option>
+                    <option value="Europe/London">London</option>
+                    <option value="Europe/Paris">Paris, Berlin</option>
+                    <option value="Asia/Kolkata">India Standard Time</option>
+                    <option value="Asia/Tokyo">Japan Standard Time</option>
+                    <option value="Australia/Sydney">Sydney</option>
+                </select> <br>
+                <button type="submit">Submit Changes</button>
+                <button type="button" onclick="closePopup('change-timezone')">Cancel</button>
             </form>
         </div>
 

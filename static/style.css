@@ -802,7 +802,7 @@ button:hover {
     margin-left: 40px;
     margin-right: 40px;
     padding-top: 0px;
-    padding-bottom: 10px;
+    padding-bottom: 30px;
 }
 
 .account-items, .preferences-items {
@@ -876,7 +876,18 @@ button:hover {
     border-radius: 5px;
 }
 
-#change-name.show, #change-password.show, #delete-account.show, #notifications.show, #delete-data.show {
+
+#change-timezone {
+    position: fixed;
+    top: 46%;
+    left: 22%;
+    background: lightgray;
+    padding: 10px;
+    border: 8px solid darkgray;
+    border-radius: 5px;
+}
+
+#change-name.show, #change-password.show, #delete-account.show, #notifications.show, #delete-data.show, #change-timezone.show {
     display: flex; /* show when .show class is added */
 }
 

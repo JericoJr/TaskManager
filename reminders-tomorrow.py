@@ -41,9 +41,7 @@ def task_reminders_tomorrow():
                 user = User.query.get(user_id) # Get User from User Database using their ID
                 email = user.email
 
-                if user.email_notifications and task.set_tomorrow_reminder != False: # Checks if user set email notifications to on 
-                    task.set_tomorrow_reminder = False
-                    db.session.commit()
+                if user.email_notifications: # Checks if user set email notifications to on
                     # Prepare the reminder email message
                     msg = Message(
                         subject=f"⏰ Task Reminder: {task.title} Due Tomorrow",

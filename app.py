@@ -743,8 +743,17 @@ def filter_sort_task():
 # Define a route for '/settings'
 @app.route('/settings')
 def settings():
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
+    user_timezone = user.timezone
+
+    email_notifications = user.email_notifications
+    if email_notifications:
+        notifications = 'On'
+    else:
+        notifications = 'Off'
     # This function runs when someone visits '/settings'
-    return render_template('settings.html')
+    return render_template('settings.html', timezone=user_timezone, notifications=notifications)
 
 # Define a route for '/change_name'
 @app.route('/change_name', methods=['POST'])
@@ -804,6 +813,31 @@ def delete_account():
     session.clear()
     flash('Account Deleted','error')
     return redirect(url_for('login'))
+
+# Define a route for '/change_timezone'
+@app.route('/change_timezone', methods=['POST'])
+def change_timezone():
+    timezone_request = request.form['timezone']
+    user_id = session.get('user_id') # Gets user id from session
+    user = User.query.get(user_id) # Gets User object from user_id
+
+    old_timezone = user.timezone # Gets previous timezone
+    # Change user's timezone
+    user.timezone = timezone_request
+
+    # Change all tasks deadline to fit new timezone deadline
+    user_tasks = Task.query.filter_by(user_id=user_id).all()
+    for task in user_tasks:
+        # NEEDS TO BE FIXED
+        old_deadline = task.deadline.replace(tzinfo=ZoneInfo(old_timezone))  
+        # Convert into new timezone
+        new_deadline = old_deadline.astimezone(ZoneInfo(timezone_request))  
+        task.deadline = new_deadline
+    db.session.commit()
+    session['user_timezone'] = timezone_request
+    return redirect(url_for('settings'))
+
+            
 
 # Define a route for '/notifications'
 @app.route('/notifications', methods=['POST']) 

@@ -10,6 +10,8 @@ To keep users on track, the app supports automated email reminders scheduled wit
 
 -12 AM UTC (8 PM EDT) → Sends reminders for tasks due tomorrow
 
+-Hourly Checks → Sends reminders for any tasks due in less than an hour
+
 All user accounts and tasks are stored locally in an SQLite database. Users can register with their email and password, and multiple accounts are supported—ensuring each user’s tasks remain securely linked to their profile.
 
 For better visualization, the app includes a real-time calendar that dynamically updates with task deadlines, allowing users to view tasks by day, week, or month and drill down into specific dates.
