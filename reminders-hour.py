@@ -39,12 +39,12 @@ def task_reminder_hour():
             else:
                 task_deadline = task.deadline.astimezone(user_tz)
 
-            print(f"curr-day: {user_today} curr-day_format: {user_today.strftime('%B %d %Y')}")
+            print(f"curr-day: {user_today} curr-day_format: {user_today.strftime('%B %d %Y')} task_deadline: {task_deadline}")
             # Checks if current task deadline is today in user's timezone
             if task_deadline.date() == user_today:
                 print(f"Matched today's task: {task.title} deadline={task.deadline} deadline_format={task.deadline.strftime('%B %d %Y @ %I:%M %p')} user={task.user_id}")
                 # Now check if due within the next hour
-                time_left = task.deadline - datetime.now(timezone.utc).astimezone(user_tz)
+                time_left = task_deadline - datetime.now(timezone.utc).astimezone(user_tz)
                 # Convert time_left into seconds
                 seconds_left = time_left.total_seconds()
                 print(f"Time left for {task.title}: {time_left} or in seconds {seconds_left} or {time_left.strftime('%I:%M %p')}")
