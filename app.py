@@ -117,8 +117,8 @@ class Task(db.Model):
     # Stores level of priority for the task
     priority = db.Column(db.String(50), nullable=False)
 
-    # Stores deadline for task, nullable = true means it can be empty; Note: each month, day, and year would be integers
-    deadline = db.Column(db.DateTime, nullable=True)
+    # Stores deadline for task with timezone info like UTC, EDT, nullable = true means it can be empty; Note: each month, day, and year would be integers
+    deadline = db.Column(db.DateTime(timezone=True), nullable=True)
 
     # Stores status of task like complete and in-progress where in-progess is default.
     status = db.Column(db.String(50), nullable=False, default='In-Progress')
