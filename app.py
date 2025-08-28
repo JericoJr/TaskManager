@@ -21,6 +21,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 
 from dotenv import load_dotenv
+from zoneinfo import ZoneInfo
 import pytz
 
 
@@ -91,6 +92,9 @@ class User(db.Model):
     # Stores hashed password (never store plaintext passwords!)
     password_hash = db.Column(db.String(128))
 
+    # Stores User current Timezone
+    timezone = db.Column(db.String, default="UTC")  # e.g., "America/New_York"
+
     # Method to set password: converts plain password to a secure hash
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -152,6 +156,7 @@ def signup():
         first = request.form['first']
         last = request.form['last']
         password = request.form['password']
+        timezone = request.form['timezone']
 
         # Check if a user with this email already exists
         if User.query.filter_by(email=email).first(): # Query the User table for a record with the matching email and return the first match or None if no user exists
@@ -167,6 +172,9 @@ def signup():
 
         # Sets default email notfications as true 
         new_user.email_notifications = True
+
+        # Sets user's timezone
+        new_user.timezone = timezone
 
         # Add the new user to the database session and commit(save) changes
         db.session.add(new_user)
@@ -575,10 +583,14 @@ def add_task():
     description = request.form['description']
     priority = request.form['priority']
     date = request.form['deadline']
+    user_id = session['user_id'] # Grab the current logged-in user's ID from the session
+    user = User.query.get(user_id) # Gets User object
 
     #Convert date string into datetime object
     deadline = datetime.strptime(date, '%Y-%m-%dT%H:%M') # typical date string is '2025-08-12T15:30'
-
+    # Attach user's timezone to the deadline
+    deadline = deadline.replace(tzinfo=ZoneInfo(user.timezone))
+    
     # Create a new Task instance with its elements like title, description, priority, deadline, status
     new_task = Task(title=title) # Note: title(database column) = title(local variable)
     new_task.description = description
@@ -589,8 +601,6 @@ def add_task():
     # Set email reminders for task to true by default, only works if user turns on email notifications
     new_task.set_today_reminder = True
     new_task.set_tomorrow_reminder = True
-
-    user_id = session['user_id'] # Grab the current logged-in user's ID from the session
 
     new_task.user_id = user_id # Assigns task with user id
     
