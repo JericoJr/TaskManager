@@ -45,9 +45,11 @@ def task_reminder_hour():
                 print(f"Matched today's task: {task.title} deadline={task.deadline} deadline_format={task.deadline.strftime('%B %d %Y @ %I:%M %p')} user={task.user_id}")
                 # Now check if due within the next hour
                 time_left = task_deadline - datetime.now(timezone.utc).astimezone(user_tz)
-                print(f"Time left for {task.title}: {time_left}")
-                # If time_left is <= 1 hour then send email
-                if timedelta(0) <= time_left <= timedelta(hours=1):
+                # Convert time_left into seconds
+                seconds_left = time_left.total_seconds()
+                print(f"Time left for {task.title}: {time_left} or in seconds {seconds_left}")
+                # If time_left is <= 1 hour or between 0 to 3600 seconds then send email
+                if 0 <= time_left <= 3600:
                     print(f"Matched 1-hour task: {task.title} deadline={task.deadline} user={task.user_id} time={time_left}")
 
                     email = user.email
