@@ -42,7 +42,7 @@
           <tr id="task-row">
             <td>{{ task.title }}</td>         <!-- Access task title -->
             <td>{{ task.description }}</td>   <!-- Access task description -->
-            <td>{{ task.deadline.strftime('%B %d, %Y @ %I:%M %p')  }}</td> <!-- Formatted deadline -->
+            <td>{{ task.local_deadline.strftime('%B %d, %Y @ %I:%M %p')  }}</td> <!-- Formatted deadline -->
             <td>{{ task.priority }}</td>      <!-- Access task priority -->
             <td class="task-status-data">
               <!--Links to flask change_task_status route and passes task_id as a parameter to function-->

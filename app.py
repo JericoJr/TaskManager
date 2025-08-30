@@ -295,8 +295,8 @@ def home():
     user_id = session['user_id'] # Grab the current logged-in user's ID from the session
     user = User.query.get(user_id)  # Used user_id to get the user object from database
 
-    # Get current or selected month/year
-    today = datetime.today()
+    # Get current or selected month/year within user's timezone
+    today = datetime.now(ZoneInfo(user.timezone))
     # Get the 'month' and 'year' value from the URL query parameters (e.g., /home?month=9, /home?year=2025)
     # If 'month' or 'year' is not provided in the URL, use the current month and year from today's date
     # 'type=int' converts the value to an integer
@@ -382,7 +382,7 @@ def home():
         extract('year', Task.deadline) == today.year
     ).count()
 
-    today = datetime.today().date() # force today to be a date object without time
+    today = datetime.now(ZoneInfo(user.timezone)).date() # force today to be a date object without time
     # Calculate the start and end of the current week (Monday to Sunday) of today's date; variables store date objects
     start_of_week = today - timedelta(days=today.weekday())        # Monday - today.weekday() calculates days passed since Mon. and subtracts by current day
     end_of_week = start_of_week + timedelta(days=6)                # Sunday - Adds 6 days to start of week
@@ -414,13 +414,18 @@ def home():
 
 def reminderTasksList():
     user_id = session.get('user_id')
-    today = date.today()
+    user = User.query.get(user_id)
+    timezone = ZoneInfo(user.timezone) # user.timezone is a string, ZoneInfo converts it into timezone
+    # "today" in user's local timezone
+    today = datetime.now(timezone).date()
     top3 = [] # Holds a list of the top 3 tasks due
     allTasks = Task.query.filter_by(user_id=user_id).order_by(Task.deadline.asc()).all() # Filters tasks by user's id in database, and sort by deadline (earliest to latest)
-    # Loops through tasks one by
+    # Loops through tasks one by one, getting top 3 tasks by nearest deadline
     for task in allTasks:
         if len(top3) < 3:
-            if task.status == 'In-Progress' and task.deadline.date() >= today:
+            # Convert deadline from UTC → user's timezone before comparing
+            deadline_local = task.deadline.astimezone(timezone)
+            if task.status == 'In-Progress' and deadline_local.date() >= today:
                 top3.append(task)
         else:
             break
@@ -494,6 +499,7 @@ def view_more_tasks(deadline):
 @app.route('/tasks')
 def tasks():
     user_id = session['user_id']
+    user = User.query.get(user_id)
 
     # Get sort values from session and assign to these variables, if no values return None as Default
     sort_title = session.get('sort_title')
@@ -572,10 +578,15 @@ def tasks():
     user_tasks = query.all()  # Get all tasks for this user according to the id, default order is by date task was created from earliest to latest
     user_tasks_count = query.count() # Gets the total count of tasks of the user
 
+    # Convert each task's deadline to user's timezone as by default is in UTC; Note: won't change the deadline within Databse
+    for task in user_tasks:
+        task.local_deadline = task.deadline.astimezone(ZoneInfo(user.timezone)) # Tempoary attribute used to hold Task's local deadline
+       
+
     # This function runs when someone visits '/tasks', also passes other values like user_tasks so it can be accessed in tasks.html
     return render_template('tasks.html', tasks=user_tasks, count=user_tasks_count, sort_title=sort_title, sort_type=sort_type, filter_priorities=filter_priorities, filter_status=filter_status, filter_months=filter_months, filter_year=filter_year, filter_day=filter_day)
 
-#Define a route for'/add_task'
+# Define a route for'/add_task'
 @app.route('/add_task', methods=['POST'])
 def add_task():
     # Get task eleemnts from form inputs
@@ -588,14 +599,23 @@ def add_task():
 
     #Convert date string into datetime object
     deadline = datetime.strptime(date, '%Y-%m-%dT%H:%M') # typical date string is '2025-08-12T15:30'
-    # Attach user's timezone to the deadline
-    deadline = deadline.replace(tzinfo=ZoneInfo(user.timezone))
+    user_timezone = ZoneInfo(user.timezone) # converts into timzone object
+    # Always store in UTC for consistency
+    deadline = deadline.replace(tzinfo=None)  # ensure naive
+    deadline_local = datetime(year=deadline.year,
+                          month=deadline.month,
+                          day=deadline.day,
+                          hour=deadline.hour,
+                          minute=deadline.minute,
+                          tzinfo=user_timezone)
+    # Convert to UTC for storing
+    deadline_utc = deadline_local.astimezone(ZoneInfo("UTC"))
     
     # Create a new Task instance with its elements like title, description, priority, deadline, status
     new_task = Task(title=title) # Note: title(database column) = title(local variable)
     new_task.description = description
     new_task.priority = priority
-    new_task.deadline = deadline
+    new_task.deadline = deadline_utc
     new_task.status = 'In-Progress' # Set status as In-Progress as default
 
     # Set email reminders for task to true by default, only works if user turns on email notifications
@@ -615,6 +635,8 @@ def add_task():
 #Define a route for'/edit_task' that accepts an integer task_id from the URL
 @app.route('/edit_task/<int:task_id>', methods=['POST'])
 def edit_task(task_id):
+    user_id = session['user_id'] # Grab the current logged-in user's ID from the session
+    user = User.query.get(user_id) # Gets User object
     # Gets task from database
     task = Task.query.get(task_id)
 
@@ -625,6 +647,10 @@ def edit_task(task_id):
     date = request.form['deadline']
 
     deadline = datetime.strptime(date, '%Y-%m-%dT%H:%M') # typical date string is '2025-08-12T15:30'
+    # Interpret this new date as being in the user’s timezone
+    deadline = deadline.replace(tzinfo=ZoneInfo(user.timezone))  
+    # Convert to UTC before saving in databse
+    deadline_utc = deadline.astimezone(ZoneInfo("UTC"))
 
     if title and title != task.title: # Checks if title is not empty and title is different from previous title, change title
         task.title = title
@@ -632,8 +658,8 @@ def edit_task(task_id):
         task.description = description
     if priority and priority != task.priority: # Checks if priority is not empty and priority is differrent, change priority
         task.priority = priority
-    if deadline and deadline != task.deadline: # Checks if date is not empty and date is different, change date
-        task.deadline = deadline
+    if deadline_utc and deadline_utc != task.deadline: # Checks if date is not empty and date is different, change date
+        task.deadline = deadline_utc
 
     # Saves info    
     db.session.commit()
@@ -821,18 +847,8 @@ def change_timezone():
     user_id = session.get('user_id') # Gets user id from session
     user = User.query.get(user_id) # Gets User object from user_id
 
-    old_timezone = user.timezone # Gets previous timezone
     # Change user's timezone
     user.timezone = timezone_request
-
-    # Change all tasks deadline to fit new timezone deadline
-    user_tasks = Task.query.filter_by(user_id=user_id).all()
-    for task in user_tasks:
-        # NEEDS TO BE FIXED
-        old_deadline = task.deadline.replace(tzinfo=ZoneInfo(old_timezone))  
-        # Convert into new timezone
-        new_deadline = old_deadline.astimezone(ZoneInfo(timezone_request))  
-        task.deadline = new_deadline
     db.session.commit()
     session['user_timezone'] = timezone_request
     return redirect(url_for('settings'))
