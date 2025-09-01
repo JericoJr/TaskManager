@@ -2,9 +2,7 @@ name: Send Email Reminders   # Name of the workflow, shows up in GitHub Actions 
 
 on:
   schedule:
-    - cron: '0 9 * * *'      # Run every day at 9:00 AM UTC (5:00 AM EDT) → send "today" reminders
-    - cron: '0 0 * * *'      # Run every day at 12:00 AM UTC (8:00 PM EDT) → send "tomorrow" reminders
-    - cron: '0 * * * *'       # Runs hourly
+    - cron: '0 * * * *'       # Runs hourly in uTC
   workflow_dispatch:          # Allows manual triggering of this workflow from the GitHub Actions tab
     inputs:
       test_hour:              # Optional input → lets you simulate a UTC hour
@@ -46,19 +44,14 @@ jobs:
           if [ -z "$HOUR" ]; then
             HOUR=$(date -u +"%H")   # Get current UTC hour
           fi
-          if [ -z "$MINUTE" ]; then
-            MINUTE=$(date -u +"%M") # Get current UTC minute
-          fi
-
-          echo "Simulated UTC time: $HOUR:$MINUTE"
 
           # Decide which script to run
-          if [ "$HOUR" -eq 9 ] && [ "$MINUTE" -eq 0 ]; then
-            echo "script=reminders-today.py" >> "$GITHUB_OUTPUT"   # Use reminders-today script
-          elif [ "$HOUR" -eq 0 ] && [ "$MINUTE" -eq 0 ]; then
-            echo "script=reminders-tomorrow.py" >> "$GITHUB_OUTPUT" # Use reminders-tomorrow script
+          if [ "$HOUR" -eq 9 ]; then
+            echo "script=reminders-today.py" >> "$GITHUB_OUTPUT"   # Use reminders-today script runs at 9 AM UTC
+          elif [ "$HOUR" -eq 0 ]; then
+            echo "script=reminders-tomorrow.py" >> "$GITHUB_OUTPUT" # Use reminders-tomorrow script runs at 12:00 or 0:00 AM UTC
           else
-            echo "script=reminders-hour.py" >> "$GITHUB_OUTPUT" # Use reminders-hour script
+            echo "script=reminders-hour.py" >> "$GITHUB_OUTPUT" # Use reminders-hour script runs every hour
           fi
 
       - name: Run reminders script
