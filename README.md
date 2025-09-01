@@ -2,7 +2,7 @@
 
 A modern Task Manager Web Application built with Flask, Python, HTML, CSS, Jinja, and JavaScript.
 
-This project helps users create, edit, organize, and track tasks efficiently through a task table that stores key details such as the title, description, deadline, priority, and status. Tasks can be sorted and filtered by date, priority, status, or other fields, making it easier to manage both short- and long-term goals.
+This project helps users create, edit, organize, and track tasks efficiently through a task table that stores key details such as the title, description, deadline, priority, and status. Tasks can be sorted and filtered by date, priority, status, or other fields, making it easier to manage both short-term and long-term goals.
 
 To keep users on track, the app supports automated email reminders scheduled with GitHub Actions (cron workflow):
 
@@ -12,7 +12,7 @@ To keep users on track, the app supports automated email reminders scheduled wit
 
 -Hourly Checks → Sends reminders for any tasks due in less than an hour
 
-All user accounts and tasks are stored locally in an SQLite database. Users can register with their email and password, and multiple accounts are supported—ensuring each user’s tasks remain securely linked to their profile.
+All user accounts and tasks are stored locally in an SQLite database. Users can register with their email and password, and multiple accounts are supported—ensuring each user’s tasks remain securely linked to their profile. In addition, each user can set their task deadline accornding to their current timezone which would be store within the database. 
 
 For better visualization, the app includes a real-time calendar that dynamically updates with task deadlines, allowing users to view tasks by day, week, or month and drill down into specific dates.
 
@@ -67,5 +67,4 @@ Follow these steps to get the project up and running locally:
   git add instance/taskmanager.db
   git commit -m "Update tasks"
   git push
-
-
+- Timezones and Tasks Deadlines: Users can only set up their timezones, which would be used for their tasks' deadlines, only ONCE per User or Account and CANNOT be changed
