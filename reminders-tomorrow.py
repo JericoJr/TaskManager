@@ -30,10 +30,10 @@ def task_reminders_tomorrow():
             user = User.query.get(task.user_id) # Get User Object of given task
             user_tz = ZoneInfo(user.timezone) # Get User's timezone
 
-            # Current local date for the user
+            # Current local date of tomorrow for the user
             user_tomorrow = datetime.now(timezone.utc).astimezone(user_tz).date() + timedelta(days=1)
             print(f"tomorrow-day: {user_tomorrow}")
-            # Checks if current task deadline is today in user's timezone
+            # Checks if current task deadline is tomorrow in user's timezone
             if task.deadline.date() == user_tomorrow:
                 print(f"Matched today's task: {task.title} deadline={task.deadline} deadline_format={task.deadline.strftime('%B %d %Y @ %I:%M %p')} user={task.user_id}")
 
